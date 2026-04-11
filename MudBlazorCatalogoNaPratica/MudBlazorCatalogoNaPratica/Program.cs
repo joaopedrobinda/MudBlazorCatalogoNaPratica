@@ -1,5 +1,5 @@
 using MudBlazor.Services;
-using MudBlazorCatalogoNaPratica.Client.Pages;
+using MudBlazorCatalogoNaPratica.Client;
 using MudBlazorCatalogoNaPratica.Components;
 
 var builder = WebApplication.CreateBuilder(args);
