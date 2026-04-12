@@ -70,43 +70,12 @@ else
         _loading = true;
         try
         {
-            // var resultado = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
+            var resultado = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
 
-            // if (resultado != null)
-            // {
-            //     categorias = resultado;
-            // }
-            // Simulando um atraso de rede de 1.5 segundos
-            await Task.Delay(1500);
-
-            // Dados de teste (Mock)
-            categorias = new[]
-             {
-                new Categoria { CategoriaId = 1, Name = "Eletrônicos", Descricao = "Dispositivos de última geração, incluindo smartphones, laptops de alta performance e acessórios periféricos para produtividade e entretenimento." },
-                new Categoria { CategoriaId = 2, Name = "Livros", Descricao = "Vasta coleção de obras literárias abrangendo ficção científica, biografias detalhadas, livros técnicos de programação e grandes clássicos." },
-                new Categoria { CategoriaId = 3, Name = "Cozinha", Descricao = "Utensílios domésticos modernos, eletrodomésticos de baixo consumo e itens essenciais para chefs amadores que buscam praticidade e elegância." },
-                new Categoria { CategoriaId = 4, Name = "Games", Descricao = "Consoles de nova geração, jogos exclusivos em mídia física e acessórios ergonômicos projetados para proporcionar a melhor experiência imersiva." },
-                new Categoria { CategoriaId = 5, Name = "Vestuário", Descricao = "Moda masculina, feminina e infantil, com peças confortáveis, estilosas e ideais para todas as estações do ano e ocasiões especiais." },
-                new Categoria { CategoriaId = 6, Name = "Calçados", Descricao = "Ampla variedade de tênis esportivos, sapatos sociais e sandálias ergonômicas para garantir o máximo de conforto em cada passo do seu dia." },
-                new Categoria { CategoriaId = 7, Name = "Beleza e Perfumaria", Descricao = "Produtos de cuidados pessoais, maquiagens de alta durabilidade e fragrâncias exclusivas para realçar sua beleza natural diariamente." },
-                new Categoria { CategoriaId = 8, Name = "Móveis", Descricao = "Mobília projetada para unir sofisticação e conforto, otimizando espaços na sua sala, quarto ou escritório com design contemporâneo." },
-                new Categoria { CategoriaId = 9, Name = "Ferramentas", Descricao = "Ferramentas manuais e elétricas de alta precisão para uso profissional e pequenos reparos domésticos, garantindo segurança e eficiência." },
-                new Categoria { CategoriaId = 10, Name = "Esportes", Descricao = "Equipamentos, roupas e acessórios focados em alto rendimento para a prática de diversas modalidades esportivas e atividades ao ar livre." },
-                new Categoria { CategoriaId = 11, Name = "Brinquedos", Descricao = "Jogos educativos, bonecos e atividades lúdicas que estimulam a criatividade, o aprendizado e a diversão segura de crianças de todas as idades." },
-                new Categoria { CategoriaId = 12, Name = "Papelaria", Descricao = "Materiais escolares, organizadores e suprimentos de escritório indispensáveis para estudantes e profissionais que buscam mais produtividade." },
-                new Categoria { CategoriaId = 13, Name = "Automotivo", Descricao = "Peças de reposição, acessórios de limpeza e equipamentos de som automotivo para manter seu veículo sempre seguro, confortável e valorizado." },
-                new Categoria { CategoriaId = 14, Name = "Pet Shop", Descricao = "Rações balanceadas, brinquedos interativos e produtos de higiene para garantir a saúde e a felicidade do seu animal de estimação." },
-                new Categoria { CategoriaId = 15, Name = "Alimentos e Bebidas", Descricao = "Bebidas premium, snacks saudáveis e ingredientes selecionados para proporcionar experiências gastronômicas incríveis na sua casa." },
-                new Categoria { CategoriaId = 16, Name = "Instrumentos", Descricao = "Violões, teclados e baterias de marcas renomadas, além de acessórios essenciais para músicos iniciantes e profissionais." },
-                new Categoria { CategoriaId = 17, Name = "Joias e Relógios", Descricao = "Peças elegantes, como colares, anéis e relógios de pulso que combinam precisão e design refinado para complementar o seu estilo." },
-                new Categoria { CategoriaId = 18, Name = "Saúde e Bem-Estar", Descricao = "Suplementos vitamínicos, monitores de pressão e itens de primeiros socorros voltados para o cuidado contínuo do seu bem-estar físico." },
-                new Categoria { CategoriaId = 19, Name = "Jardim e Piscina", Descricao = "Itens para paisagismo, manutenção de piscinas e decoração externa, transformando seu quintal em um verdadeiro ambiente de lazer e relaxamento." },
-                new Categoria { CategoriaId = 20, Name = "Bebês", Descricao = "Fraldas, carrinhos de passeio e roupinhas confortáveis desenvolvidas com materiais antialérgicos para o cuidado seguro dos recém-nascidos." },
-                new Categoria { CategoriaId = 21, Name = "Cama, Mesa e Banho", Descricao = "Lençóis macios, toalhas de alta absorção e itens de cama que trazem o aconchego e a elegância de um hotel de luxo para o seu lar." },
-                new Categoria { CategoriaId = 22, Name = "Decoração", Descricao = "Quadros, vasos, tapetes e luminárias criativas que trazem personalidade, estilo e aconchego para cada canto da sua residência." },
-                new Categoria { CategoriaId = 23, Name = "Informática", Descricao = "Componentes de hardware, monitores de alta resolução e periféricos projetados para montar o setup ideal de trabalho ou para jogos avançados." },
-                new Categoria { CategoriaId = 24, Name = "Eletrodomésticos", Descricao = "Geladeiras, fogões e micro-ondas modernos com alta eficiência energética, facilitando o seu dia a dia e renovando a sua cozinha." }
-            };
+            if (resultado != null)
+            {
+                categorias = resultado;
+            }
         }
 
         catch (Exception ex)
