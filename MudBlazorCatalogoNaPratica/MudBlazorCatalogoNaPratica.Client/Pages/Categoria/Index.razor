@@ -1,8 +1,18 @@
 ﻿@page "/categorias"
 
-<MudText Typo="Typo.h4">
-    Categorias
-</MudText>
+<div class="d-flex justify-space-between align-center mt-6">
+    <div>
+        <MudText Typo="Typo.h4" Color="Color.Primary">Categorias</MudText>
+        <MudDivider Class="mb-6" />
+    </div>
+    
+    <MudButton Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Add"
+               Color="Color.Primary"
+               Href="/categoria/create">
+        Nova Categoria
+    </MudButton>
+</div>
 
 @if (_loading)
 {
@@ -10,7 +20,6 @@
 }
 else if (categorias == null || !categorias.Any())
 {
-    @* Estado 2: Carregamento concluído, mas lista vazia *@
     <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">Nenhuma categoria encontrada.</MudAlert>
 }
 else
@@ -19,12 +28,14 @@ else
     @bind-RowsPerPage="rowsPerPage">
         <HeaderContent>
             <MudTh>Categoria</MudTh>
+            <MudTh>Nome</MudTh>
             <MudTh>Descrição</MudTh>
             <MudTh>Ações</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Categoria">@context.CategoriaId</MudTd>
-            <MudTd DataLabel="Descrição">@context.Name</MudTd>
+            <MudTd DataLabel="Nome">@context.Name</MudTd>
+            <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
             <MudTd DataLabel="Ações">
                 <MudButton Variant="Variant.Text" Color="Color.Primary">Editar</MudButton>
                 <MudButton Variant="Variant.Text" Color="Color.Error">Deletar</MudButton>
@@ -32,16 +43,6 @@ else
         </RowTemplate>
     </MudTable>
 }
-<div>
-    <MudButton Variant="Variant.Filled"
-               Size="Size.Small"
-               Color="Color.Primary"
-               StartIcon="@Icons.Material.Filled.Add"
-               Href="/categoria/create">
-        Criar Categoria
-    </MudButton>
-</div>
-
 
 @code {
     private int rowsPerPage = 5;
@@ -54,23 +55,52 @@ else
         _loading = true;
         try
         {
-            var resultado = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
+            // var resultado = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
 
-            if (resultado != null)
-            {
-                categorias = resultado;
-            }
+            // if (resultado != null)
+            // {
+            //     categorias = resultado;
+            // }
+            // Simulando um atraso de rede de 1.5 segundos
+            await Task.Delay(1500);
+
+            // Dados de teste (Mock)
+            categorias = new[]
+{
+    new Categoria
+    {
+        CategoriaId = 1,
+        Name = "Eletrônicos",
+        Descricao = "Dispositivos de última geração, incluindo smartphones, laptops de alta performance e acessórios periféricos para produtividade e entretenimento digital avançado."
+    },
+    new Categoria
+    {
+        CategoriaId = 2,
+        Name = "Livros",
+        Descricao = "Vasta coleção de obras literárias abrangendo ficção científica, biografias detalhadas, livros técnicos de programação e grandes clássicos da literatura mundial contemporânea."
+    },
+    new Categoria
+    {
+        CategoriaId = 3,
+        Name = "Cozinha",
+        Descricao = "Utensílios domésticos modernos, eletrodomésticos de baixo consumo e itens essenciais para chefs amadores que buscam praticidade e elegância no preparo de receitas complexas."
+    },
+    new Categoria
+    {
+        CategoriaId = 4,
+        Name = "Games",
+        Descricao = "Consoles de nova geração, jogos exclusivos em mídia física e acessórios ergonômicos projetados para proporcionar a melhor experiência imersiva em sessões de jogo prolongadas."
+    }
+};
         }
 
         catch (Exception ex)
         {
-            // Aqui você pode colocar um alerta do MudBlazor (Snackbar) avisando
-            // que a internet caiu ou o servidor deu erro.
+            Snackbar.Add("Erro ao carregar categorias. Tente novamente mais tarde.", Severity.Error);
             Console.WriteLine($"Erro ao buscar categorias: {ex.Message}");
         }
         finally
         {
-            // Desliga a barrinha de carregamento, quer tenha dado certo ou errado.
             _loading = false;
         }
     }
