@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="MudBlazorCatalogoNaPratica.Shared/MudBlazorCatalogoNaPratica.Shared.csproj" Id="c16046b2-9d65-47f0-b87c-8d08970e2fb7" />
   <Project Path="MudBlazorCatalogoNaPratica/MudBlazorCatalogoNaPratica.Client/MudBlazorCatalogoNaPratica.Client.csproj" />
   <Project Path="MudBlazorCatalogoNaPratica/MudBlazorCatalogoNaPratica/MudBlazorCatalogoNaPratica.csproj" />
 </Solution>
