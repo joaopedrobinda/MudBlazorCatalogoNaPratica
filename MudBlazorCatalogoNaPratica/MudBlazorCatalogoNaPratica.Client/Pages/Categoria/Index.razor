@@ -1,10 +1,77 @@
 ﻿@page "/categorias"
 
-<MudText Typo="Typo.h3">
+<MudText Typo="Typo.h4">
     Categorias
 </MudText>
 
+@if (_loading)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else if (categorias == null || !categorias.Any())
+{
+    @* Estado 2: Carregamento concluído, mas lista vazia *@
+    <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">Nenhuma categoria encontrada.</MudAlert>
+}
+else
+{
+    <MudTable Items="@categorias" Hover="true" Dense="true"
+    @bind-RowsPerPage="rowsPerPage">
+        <HeaderContent>
+            <MudTh>Categoria</MudTh>
+            <MudTh>Descrição</MudTh>
+            <MudTh>Ações</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Categoria">@context.CategoriaId</MudTd>
+            <MudTd DataLabel="Descrição">@context.Name</MudTd>
+            <MudTd DataLabel="Ações">
+                <MudButton Variant="Variant.Text" Color="Color.Primary">Editar</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error">Deletar</MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+<div>
+    <MudButton Variant="Variant.Filled"
+               Size="Size.Small"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Add"
+               Href="/categoria/create">
+        Criar Categoria
+    </MudButton>
+</div>
+
 
 @code {
+    private int rowsPerPage = 5;
+    private bool _loading = false;
 
+    private Categoria[]? categorias;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try
+        {
+            var resultado = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
+
+            if (resultado != null)
+            {
+                categorias = resultado;
+            }
+        }
+
+        catch (Exception ex)
+        {
+            // Aqui você pode colocar um alerta do MudBlazor (Snackbar) avisando
+            // que a internet caiu ou o servidor deu erro.
+            Console.WriteLine($"Erro ao buscar categorias: {ex.Message}");
+        }
+        finally
+        {
+            // Desliga a barrinha de carregamento, quer tenha dado certo ou errado.
+            _loading = false;
+        }
+    }
 }
