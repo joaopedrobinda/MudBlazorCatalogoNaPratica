@@ -48,7 +48,7 @@ else
             <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
             <MudTd DataLabel="Ações">
                 <MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"/categoria/edit/{context.CategoriaId}")">Editar</MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Error">Deletar</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@(() => DeletarCategoria(context.CategoriaId))">Deletar</MudButton>
             </MudTd>
         </RowTemplate>
         <PagerContent>
@@ -67,25 +67,44 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await CarregarDados();
+    }
+
+    private async Task CarregarDados()
+    {
         _loading = true;
         try
         {
-            var resultado = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
-
-            if (resultado != null)
-            {
-                categorias = resultado;
-            }
+            // Busca os dados da API
+            categorias = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
         }
-
         catch (Exception ex)
         {
-            Snackbar.Add("Erro ao carregar categorias. Tente novamente mais tarde.", Severity.Error);
-            Console.WriteLine($"Erro ao buscar categorias: {ex.Message}");
+            Snackbar.Add("Erro ao carregar dados", Severity.Error);
         }
         finally
         {
             _loading = false;
+        }
+    }
+    private async Task DeletarCategoria(int categoriaId)
+    {
+        bool? confirmacao = await DialogService.ShowMessageBoxAsync(
+            "Confirmação",
+            "Tem certeza que deseja deletar esta categoria?",
+            yesText: "Sim",
+            noText: "Não");
+        if (confirmacao == true)
+        {
+            var response = await Http.DeleteAsync($"/api/categoria/{categoriaId}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Deletado!", Severity.Success);
+                
+                // RECARREGA OS DADOS AQUI
+                await CarregarDados();
+            }
         }
     }
 }
