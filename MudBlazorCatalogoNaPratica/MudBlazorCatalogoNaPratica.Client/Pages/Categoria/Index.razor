@@ -47,7 +47,7 @@ else
             <MudTd DataLabel="Nome">@context.Name</MudTd>
             <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
             <MudTd DataLabel="Ações">
-                <MudButton Variant="Variant.Text" Color="Color.Primary">Editar</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"/categoria/edit/{context.CategoriaId}")">Editar</MudButton>
                 <MudButton Variant="Variant.Text" Color="Color.Error">Deletar</MudButton>
             </MudTd>
         </RowTemplate>

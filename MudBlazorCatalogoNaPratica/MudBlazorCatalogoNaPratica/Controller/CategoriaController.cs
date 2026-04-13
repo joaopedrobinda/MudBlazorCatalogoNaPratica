@@ -35,9 +35,13 @@ namespace MudBlazorCatalogoNaPratica.Controller
             return new CreatedAtRouteResult("GetCategoria", new { id = categoria.CategoriaId }, categoria);
         }
 
-        [HttpPut]
-        public async Task<ActionResult<Categoria>> Put(Categoria categoria)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Categoria>> Put(int id, Categoria categoria)
         {
+            if (id != categoria.CategoriaId)
+            {
+                return BadRequest("O ID da URL não coincide com o ID da categoria.");
+            }
             context.Entry(categoria).State = EntityState.Modified;
             await context.SaveChangesAsync();
             return Ok(categoria);
