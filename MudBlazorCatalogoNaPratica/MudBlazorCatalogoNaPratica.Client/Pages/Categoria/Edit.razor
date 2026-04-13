@@ -6,96 +6,47 @@
 </div>
 
 <MudPaper Class="pa-4" Elevation="3">
-    <MudForm @ref="form" @bind-IsValid="@_isFormValid">
-        <MudGrid>
-            <MudItem xs="12">
-                <MudTextField @bind-Value="categoria.Name"
-                              For="@(() => categoria.Name)"
-                              Label="Nome da Categoria*"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Immediate="true" />
-            </MudItem>
-            
-            <MudItem xs="12">
-                <MudTextField @bind-Value="categoria.Descricao"
-                              For="@(() => categoria.Descricao)"
-                              Label="Descrição*"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Lines="3"
-                              Immediate="true" />
-            </MudItem>
-
-            <MudItem xs="12" Class="d-flex justify-space-between align-center mt-1">
-                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="Voltar">
-                    Cancelar
-                </MudButton>
-                
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Disabled="@(!_isFormValid || _isSaving)"
-                           OnClick="EditarCategoriaAsync">
-                    @if (_isSaving)
-                    {
-                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                        <MudText Class="ms-2">Salvando...</MudText>
-                    }
-                    else
-                    {
-                        <MudText>Alterar</MudText>
-                    }
-                </MudButton>
-            </MudItem>
-        </MudGrid>
-    </MudForm>
+    @if (_categoria == null)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+    }
+    else
+    {
+        <CategoriaForm Categoria="_categoria"
+                       IsSaving="_isSaving"
+                       ButtonText="Alterar"
+                       OnValidSubmit="EditarCategoriaAsync"
+                       OnCancel="Voltar" />
+    }
 </MudPaper>
 
 @code {
-    private MudForm? form;
-    private bool _isFormValid;
+    [Parameter] public int categoriaid { get; set; }
+    private Categoria? _categoria;
     private bool _isSaving;
 
-    [Parameter]
-    public int categoriaid { get; set; }
-
-    Categoria categoria = new Categoria();
-
-    protected async override Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        categoria = await Http.GetFromJsonAsync<Categoria>($"api/categoria/{categoriaid}");
+        _categoria = await Http.GetFromJsonAsync<Categoria>($"api/categoria/{categoriaid}");
     }
 
-    async Task EditarCategoriaAsync()
+    private async Task EditarCategoriaAsync()
     {
-        if (form is null) return;
-        await form.ValidateAsync();
-        if (!form.IsValid) return;
         try
         {
             _isSaving = true;
-            var response = await Http.PutAsJsonAsync<Categoria>($"api/categoria/{categoriaid}", categoria);
+            var response = await Http.PutAsJsonAsync($"api/categoria/{categoriaid}", _categoria);
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Categoria editada com sucesso!", Severity.Success);
-                NavigationManager.NavigateTo("categorias");
+                Snackbar.Add("Categoria editada!", Severity.Success);
+                Voltar();
             }
-            else
-            {
-                Snackbar.Add("Ocorreu um erro ao editar a categoria.", Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Ocorreu um erro: {ex.Message}", Severity.Error);
         }
         finally
         {
             _isSaving = false;
         }
     }
-    private void Voltar()
-    {
-        NavigationManager.NavigateTo("/categorias");
-    }
+
+    private void Voltar() => NavigationManager.NavigateTo("/categorias");
 }

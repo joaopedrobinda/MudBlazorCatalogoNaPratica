@@ -6,82 +6,28 @@
 </div>
 
 <MudPaper Class="pa-4" Elevation="3">
-    <MudForm @ref="form" @bind-IsValid="@_isFormValid">
-        <MudGrid>
-            <MudItem xs="12">
-                <MudTextField @bind-Value="categoria.Name"
-                              For="@(() => categoria.Name)"
-                              Label="Nome da Categoria*"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Immediate="true" />
-            </MudItem>
-            
-            <MudItem xs="12">
-                <MudTextField @bind-Value="categoria.Descricao"
-                              For="@(() => categoria.Descricao)"
-                              Label="Descrição*"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Lines="3"
-                              Immediate="true" />
-            </MudItem>
-
-            <MudItem xs="12" Class="d-flex justify-space-between align-center mt-1">
-                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="Voltar">
-                    Cancelar
-                </MudButton>
-                
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Disabled="@(!_isFormValid || _isSaving)"
-                           OnClick="SalvarCategoriaAsync">
-                    @if (_isSaving)
-                    {
-                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                        <MudText Class="ms-2">Salvando...</MudText>
-                    }
-                    else
-                    {
-                        <MudText>Salvar</MudText>
-                    }
-                </MudButton>
-            </MudItem>
-        </MudGrid>
-    </MudForm>
+    <CategoriaForm Categoria="_categoria"
+                   IsSaving="_isSaving"
+                   ButtonText="Salvar"
+                   OnValidSubmit="SalvarCategoriaAsync"
+                   OnCancel="Voltar" />
 </MudPaper>
 
 @code {
-    private Categoria categoria = new();
-    private MudForm? form;
-    private bool _isFormValid;
+    private Categoria _categoria = new();
     private bool _isSaving;
 
     private async Task SalvarCategoriaAsync()
     {
-        if (form is null) return;
-        await form.ValidateAsync();
-
-        if (!form.IsValid) return;
-
         try
         {
             _isSaving = true;
-            var response = await Http.PostAsJsonAsync("api/categoria", categoria);
-
+            var response = await Http.PostAsJsonAsync("api/categoria", _categoria);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Categoria criada com sucesso!", Severity.Success);
-                NavigationManager.NavigateTo("/categorias");
+                Voltar();
             }
-            else
-            {
-                Snackbar.Add("Erro ao criar a categoria.", Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Falha na comunicação: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -89,8 +35,5 @@
         }
     }
 
-    private void Voltar()
-    {
-        NavigationManager.NavigateTo("/categorias");
-    }
+    private void Voltar() => NavigationManager.NavigateTo("/categorias");
 }

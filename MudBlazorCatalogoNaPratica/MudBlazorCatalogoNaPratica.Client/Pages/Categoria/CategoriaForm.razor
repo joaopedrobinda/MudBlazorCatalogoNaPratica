@@ -1,0 +1,63 @@
+﻿<MudForm @ref="form" @bind-IsValid="@_isFormValid">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudTextField @bind-Value="Categoria.Name"
+                          For="@(() => Categoria.Name)"
+                          Label="Nome da Categoria*"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Immediate="true" />
+        </MudItem>
+        
+        <MudItem xs="12">
+            <MudTextField @bind-Value="Categoria.Descricao"
+                          For="@(() => Categoria.Descricao)"
+                          Label="Descrição*"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Lines="3"
+                          Immediate="true" />
+        </MudItem>
+
+        <MudItem xs="12" Class="d-flex justify-space-between align-center mt-1">
+            <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="OnCancel">
+                Cancelar
+            </MudButton>
+            
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="@(!_isFormValid || IsSaving)"
+                       OnClick="HandleSubmit">
+                @if (IsSaving)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">Salvando...</MudText>
+                }
+                else
+                {
+                    <MudText>@ButtonText</MudText>
+                }
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudForm>
+
+@code {
+    private MudForm? form;
+    private bool _isFormValid;
+
+    [Parameter] public Categoria Categoria { get; set; } = new();
+    [Parameter] public bool IsSaving { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Salvar";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await form!.ValidateAsync();
+        if (form.IsValid)
+        {
+            await OnValidSubmit.InvokeAsync();
+        }
+    }
+}
