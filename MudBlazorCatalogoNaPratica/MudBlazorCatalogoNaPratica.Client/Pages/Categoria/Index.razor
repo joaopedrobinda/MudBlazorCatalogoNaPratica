@@ -15,115 +15,84 @@
     </MudButton>
 </div>
 
-@if (_loading)
-{
-    @* <MudProgressCircular Color="Color.Default" Indeterminate="true" /> *@
-    <MudPaper Elevation="2" Class="pa-4">
-        @* Simulando o cabeçalho da tabela *@
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="40px" Class="mb-4" Animation="Animation.Wave" />
-        
-        @* Simulando as linhas de dados *@
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="30px" Class="mb-2" Animation="Animation.Wave" />
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="30px" Class="mb-2" Animation="Animation.Wave" />
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="30px" Class="mb-2" Animation="Animation.Wave" />
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="30px" Animation="Animation.Wave" />
-    </MudPaper>
-}
-else if (categorias == null || !categorias.Any())
-{
-    <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">Nenhuma categoria encontrada.</MudAlert>
-}
-else
-{
-    <MudTable Items="@categorias" Hover="true" Dense="true"
-    @bind-RowsPerPage="rowsPerPage">
-        <HeaderContent>
-            <MudTh>Nome</MudTh>
-            <MudTh>Descrição</MudTh>
-            <MudTh>Ações</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Nome">@context.Name</MudTd>
-            <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
-            <MudTd DataLabel="Ações">
-                <div class="d-flex">
-                    <MudTooltip Text="Editar Categoria">
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                       Color="Color.Primary"
-                                       Size="Size.Small"
-                                       Href="@($"/categoria/edit/{context.CategoriaId}")" />
-                    </MudTooltip>
-        
-                    <MudTooltip Text="Excluir Categoria">
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                       Color="Color.Error"
-                                       Size="Size.Small"
-                                       OnClick="@(() => DeletarCategoria(context.CategoriaId))" />
-                    </MudTooltip>
-                </div>
-            </MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <Paginacao QuantidadetotalPaginas="QuantidadetotalPaginas" paginaAtual="paginaAtual" Raio="3" PaginaAtualSelecionada="PaginaAtualSelecionada">
-
-            </Paginacao>
-        </PagerContent>
-    </MudTable>
-}
+<MudTable T="Categoria" ServerData="ServerReload" @ref="_table" Hover="true" Dense="true">
+    <HeaderContent>
+        <MudTh>Nome</MudTh>
+        <MudTh>Descrição</MudTh>
+        <MudTh>Ações</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nome">@context.Name</MudTd>
+        <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
+        <MudTd DataLabel="Ações">
+            <div class="d-flex">
+                <MudTooltip Text="Editar Categoria">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   Href="@($"/categoria/edit/{context.CategoriaId}")" />
+                </MudTooltip>
+    
+                <MudTooltip Text="Excluir Categoria">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   OnClick="@(() => DeletarCategoria(context.CategoriaId))" />
+                </MudTooltip>
+            </div>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">Nenhuma categoria encontrada.</MudAlert>
+    </NoRecordsContent>
+     <LoadingContent>
+        <MudText>Carregando...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <div class="d-flex justify-center py-3">
+            <MudTablePager InfoFormat="{first_item}-{last_item} de {all_items}" RowsPerPageString="Linhas por página:" />
+        </div>
+    </PagerContent>
+</MudTable>
 
 @code {
-    private int rowsPerPage = 5;
-    private bool _loading = false;
+    private MudTable<Categoria> _table;
 
-    List<Categoria>? categorias;
-
-    private int paginaAtual = 1;
-    private int QuantidadetotalPaginas = 0;
-
-
-    protected override async Task OnInitializedAsync()
+    private async Task<TableData<Categoria>> ServerReload(TableState state, CancellationToken token)
     {
-        await CarregarDados(paginaAtual, rowsPerPage);
-    }
-
-    private async Task PaginaAtualSelecionada(int pagina)
-    {
-        paginaAtual = pagina;
-        await CarregarDados(paginaAtual, rowsPerPage);
-    }
-
-    private async Task CarregarDados(int pagina=1, int quantidadePorPagina=5)
-    {
-        _loading = true;
         try
         {
-            // Busca os dados da API
-            //categorias = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
-            
-            var httpResponse = await Http.GetAsync($"/api/categoria?pagina={pagina}&quantidadePorPagina={quantidadePorPagina}");
+            var pagina = state.Page + 1;
+            var quantidadePorPagina = state.PageSize;
 
-            if(httpResponse.IsSuccessStatusCode)
+            var httpResponse = await Http.GetAsync($"/api/categoria?pagina={pagina}&quantidadePorPagina={quantidadePorPagina}", token);
+
+            if (httpResponse.IsSuccessStatusCode)
             {
-                QuantidadetotalPaginas = int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault() ?? "0");
+                var totalItens = int.Parse(httpResponse.Headers.GetValues("quantidadeRegistrosTotal").FirstOrDefault() ?? "0");
+                var responseString = await httpResponse.Content.ReadAsStringAsync();
+                
+                var categorias = JsonSerializer.Deserialize<List<Categoria>>(responseString,
+                    new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
 
-                var resonseString = await httpResponse.Content.ReadAsStringAsync();
-                categorias = JsonSerializer.Deserialize<List<Categoria>>(resonseString, 
-                    new JsonSerializerOptions 
-                    { 
-                        PropertyNameCaseInsensitive = true 
-                    });
+                return new TableData<Categoria> { TotalItems = totalItens, Items = categorias };
             }
-
+        }
+        catch (OperationCanceledException)
+        {
+            // Requisição cancelada pelo MudBlazor (ex: usuário navegou rápido demais)
         }
         catch (Exception)
         {
             Snackbar.Add("Erro ao carregar dados", Severity.Error);
         }
-        finally
-        {
-            _loading = false;
-        }
+
+        return new TableData<Categoria> { TotalItems = 0, Items = new List<Categoria>() };
     }
+
     private async Task DeletarCategoria(int categoriaId)
     {
         bool? confirmacao = await DialogService.ShowMessageBoxAsync(
@@ -134,13 +103,11 @@ else
         if (confirmacao == true)
         {
             var response = await Http.DeleteAsync($"/api/categoria/{categoriaId}");
-            
+
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Deletado!", Severity.Success);
-                
-                // RECARREGA OS DADOS AQUI
-                await CarregarDados();
+                await _table.ReloadServerData();
             }
         }
     }
