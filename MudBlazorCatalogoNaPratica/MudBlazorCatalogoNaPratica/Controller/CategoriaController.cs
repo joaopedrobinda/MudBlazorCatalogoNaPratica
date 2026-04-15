@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MudBlazorCatalogoNaPratica.Context;
 using MudBlazorCatalogoNaPratica.Shared.Models;
+using MudBlazorCatalogoNaPratica.Shared.Recursos;
+using MudBlazorCatalogoNaPratica.Utils;
 
 namespace MudBlazorCatalogoNaPratica.Controller
 {
@@ -16,9 +18,12 @@ namespace MudBlazorCatalogoNaPratica.Controller
             this.context = context;
         }
         [HttpGet]
-        public async Task<ActionResult<List<Categoria>>> Get()
+        public async Task<ActionResult<List<Categoria>>> Get([FromQuery] Paginacao paginacao)
         {
-            return await context.Categorias.AsNoTracking().ToListAsync();
+            var queryable = context.Categorias.AsQueryable();
+            await HttpContext.InserirParametroEmPageResonse(queryable, paginacao.QuantidadePorPagina);
+
+            return await queryable.Paginar(paginacao).ToListAsync();
         }
 
         [HttpGet("{id}", Name = "GetCategoria")]
