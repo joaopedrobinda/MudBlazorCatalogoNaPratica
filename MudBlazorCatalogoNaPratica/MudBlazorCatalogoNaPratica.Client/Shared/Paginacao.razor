@@ -1,0 +1,109 @@
+﻿<div class="d-flex flex-row align-center justify-center mud-width-full py-4">
+    @foreach (var link in links)
+    {
+        @if (link.Text == "Anterior")
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
+                           Disabled="@(!link.Enabled)"
+                           OnClick="@(() => PaginaSelecionadaLink(link))"
+                           Size="Size.Medium" />
+        }
+        else if (link.Text == "Próxima")
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
+                           Disabled="@(!link.Enabled)"
+                           OnClick="@(() => PaginaSelecionadaLink(link))"
+                           Size="Size.Medium" />
+        }
+        else
+        {
+            @* Estilização circular para os números, igual ao MudPagination *@
+            <MudButton Variant="@(link.Active? Variant.Filled: Variant.Text)"
+                       Color="@(link.Active ? Color.Primary : Color.Default)"
+                       Disabled="@(!link.Enabled)"
+                       OnClick="@(() => PaginaSelecionadaLink(link))"
+                       Class="mx-1"
+                       Style="min-width: 40px; height: 40px; border-radius: 50%;">
+                @link.Text
+            </MudButton>
+        }
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public int paginaAtual { get; set; } = 1;
+    [Parameter]
+    public int QuantidadetotalPaginas{ get; set; }
+    [Parameter]
+    public int Raio { get; set; }
+    [Parameter]
+    public EventCallback<int> PaginaAtualSelecionada { get; set; }
+
+    List<LinkModel> links;
+
+    private async Task PaginaSelecionadaLink(LinkModel link)
+    {
+        if (link.Page == paginaAtual)
+            return;
+
+        if (!link.Enabled)
+            return;
+
+        paginaAtual = link.Page;
+        await PaginaAtualSelecionada.InvokeAsync(link.Page);
+    }
+
+    class LinkModel
+    {
+        public LinkModel(int page) : this(page, true)
+        {  }
+
+        public LinkModel(int page, bool enabled) : this(page, enabled, page.ToString())
+        {  }
+
+        public LinkModel(int page, bool enabled, string text)
+        {
+            Page = page;
+            Enabled = enabled;
+            Text = text;
+        }
+
+        public int Page { get; set; }
+        public bool Enabled { get; set; }
+        public string Text { get; set; }
+        public bool Active { get; set; }
+    }
+    protected override void OnParametersSet()
+    {
+        CarregaPaginas();
+    }
+
+    private void CarregaPaginas()
+    {
+        links = new List<LinkModel>();
+        var isLinkPaginaAnteriorHabilitada = paginaAtual != 1;
+        var paginaAnterior = paginaAtual - 1;
+
+        links.Add(new LinkModel(paginaAnterior, isLinkPaginaAnteriorHabilitada, "Anterior"));
+
+        for(int i = 1; i <= QuantidadetotalPaginas; i++)
+        {
+            if (i >= paginaAtual - Raio && i <= paginaAtual + Raio)
+            {
+                links.Add(new LinkModel(i)
+                {
+                    Active = paginaAtual == i
+                });
+            }
+        }  
+        var isLinkPaginaProximaHabilitada = paginaAtual != QuantidadetotalPaginas;
+        var paginaProxima = paginaAtual + 1;
+
+        links.Add(new LinkModel(paginaProxima, isLinkPaginaProximaHabilitada, "Próxima"));
+    
+    }
+
+
+}

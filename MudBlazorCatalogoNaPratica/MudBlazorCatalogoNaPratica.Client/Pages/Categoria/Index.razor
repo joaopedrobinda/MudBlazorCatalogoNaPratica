@@ -1,4 +1,5 @@
-﻿@page "/categorias"
+@page "/categorias"
+@using MudBlazorCatalogoNaPratica.Client.Shared
 
 <div class="d-flex justify-space-between align-center mt-6">
     <div>
@@ -37,24 +38,35 @@ else
     <MudTable Items="@categorias" Hover="true" Dense="true"
     @bind-RowsPerPage="rowsPerPage">
         <HeaderContent>
-            <MudTh>Categoria</MudTh>
             <MudTh>Nome</MudTh>
             <MudTh>Descrição</MudTh>
             <MudTh>Ações</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Categoria">@context.CategoriaId</MudTd>
             <MudTd DataLabel="Nome">@context.Name</MudTd>
             <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
             <MudTd DataLabel="Ações">
-                <MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"/categoria/edit/{context.CategoriaId}")">Editar</MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@(() => DeletarCategoria(context.CategoriaId))">Deletar</MudButton>
+                <div class="d-flex">
+                    <MudTooltip Text="Editar Categoria">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       Href="@($"/categoria/edit/{context.CategoriaId}")" />
+                    </MudTooltip>
+        
+                    <MudTooltip Text="Excluir Categoria">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() => DeletarCategoria(context.CategoriaId))" />
+                    </MudTooltip>
+                </div>
             </MudTd>
         </RowTemplate>
         <PagerContent>
-            <MudTablePager PageSizeOptions="new int[] { 5, 10, 25 }" 
-            RowsPerPageString="Linhas por página:" 
-            InfoFormat="{first_item}-{last_item} de {all_items}" />
+            <Paginacao QuantidadetotalPaginas="QuantidadetotalPaginas" paginaAtual="paginaAtual" Raio="3" PaginaAtualSelecionada="PaginaAtualSelecionada">
+
+            </Paginacao>
         </PagerContent>
     </MudTable>
 }
@@ -63,22 +75,47 @@ else
     private int rowsPerPage = 5;
     private bool _loading = false;
 
-    private Categoria[]? categorias;
+    List<Categoria>? categorias;
+
+    private int paginaAtual = 1;
+    private int QuantidadetotalPaginas = 0;
+
 
     protected override async Task OnInitializedAsync()
     {
-        await CarregarDados();
+        await CarregarDados(paginaAtual, rowsPerPage);
     }
 
-    private async Task CarregarDados()
+    private async Task PaginaAtualSelecionada(int pagina)
+    {
+        paginaAtual = pagina;
+        await CarregarDados(paginaAtual, rowsPerPage);
+    }
+
+    private async Task CarregarDados(int pagina=1, int quantidadePorPagina=5)
     {
         _loading = true;
         try
         {
             // Busca os dados da API
-            categorias = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
+            //categorias = await Http.GetFromJsonAsync<Categoria[]>("/api/categoria");
+            
+            var httpResponse = await Http.GetAsync($"/api/categoria?pagina={pagina}&quantidadePorPagina={quantidadePorPagina}");
+
+            if(httpResponse.IsSuccessStatusCode)
+            {
+                QuantidadetotalPaginas = int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault() ?? "0");
+
+                var resonseString = await httpResponse.Content.ReadAsStringAsync();
+                categorias = JsonSerializer.Deserialize<List<Categoria>>(resonseString, 
+                    new JsonSerializerOptions 
+                    { 
+                        PropertyNameCaseInsensitive = true 
+                    });
+            }
+
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Snackbar.Add("Erro ao carregar dados", Severity.Error);
         }
