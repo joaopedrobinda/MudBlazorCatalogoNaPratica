@@ -14,8 +14,8 @@ namespace MudBlazorCatalogoNaPratica.Shared.Models
         public string? Descricao { get; set; }
         [Column(TypeName = "decimal(12,2)")]
         public decimal Preco { get; set; }
-        [MaxLength(250)]
-        public string? ImagemUrl { get; set; }
+       
+        public string? Imagem { get; set; }
 
         public int CategoriaId { get; set; }
         public virtual Categoria? Categoria { get; set; }
