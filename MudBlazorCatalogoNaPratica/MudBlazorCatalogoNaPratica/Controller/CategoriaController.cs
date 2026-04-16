@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MudBlazorCatalogoNaPratica.Context;
@@ -21,6 +21,13 @@ namespace MudBlazorCatalogoNaPratica.Controller
         public async Task<ActionResult<List<Categoria>>> Get([FromQuery] Paginacao paginacao)
         {
             var queryable = context.Categorias.AsQueryable();
+
+            if (!string.IsNullOrEmpty(paginacao.TermoBusca))
+            {
+                queryable = queryable.Where(x => x.Name.ToLower().Contains(paginacao.TermoBusca.ToLower()) ||
+                                                x.Descricao.ToLower().Contains(paginacao.TermoBusca.ToLower()));
+            }
+
             await HttpContext.InserirParametroEmPageResonse(queryable, paginacao.QuantidadePorPagina);
 
             return await queryable.Paginar(paginacao).ToListAsync();

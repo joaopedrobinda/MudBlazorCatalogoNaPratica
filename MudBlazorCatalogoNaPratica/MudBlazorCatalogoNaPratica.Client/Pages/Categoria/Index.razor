@@ -16,6 +16,19 @@
 </div>
 
 <MudTable T="Categoria" ServerData="ServerReload" @ref="_table" Hover="true" Dense="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Categorias</MudText>
+        <MudSpacer />
+        <MudTextField T="string" 
+                      Placeholder="Pesquisar..." 
+                      Adornment="Adornment.Start" 
+                      AdornmentIcon="@Icons.Material.Filled.Search" 
+                      IconSize="Size.Medium" 
+                      Class="mt-0"
+                      Clearable="true"
+                      DebounceInterval="500"
+                      OnDebounceIntervalElapsed="OnSearch" />
+    </ToolBarContent>
     <HeaderContent>
         <MudTh>Nome</MudTh>
         <MudTh>Descrição</MudTh>
@@ -57,6 +70,13 @@
 
 @code {
     private MudTable<Categoria> _table;
+    private string _searchString;
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        _table.ReloadServerData();
+    }
 
     private async Task<TableData<Categoria>> ServerReload(TableState state, CancellationToken token)
     {
@@ -64,8 +84,9 @@
         {
             var pagina = state.Page + 1;
             var quantidadePorPagina = state.PageSize;
+            var termoBusca = _searchString;
 
-            var httpResponse = await Http.GetAsync($"/api/categoria?pagina={pagina}&quantidadePorPagina={quantidadePorPagina}", token);
+            var httpResponse = await Http.GetAsync($"/api/categoria?pagina={pagina}&quantidadePorPagina={quantidadePorPagina}&termoBusca={termoBusca}", token);
 
             if (httpResponse.IsSuccessStatusCode)
             {
