@@ -116,12 +116,17 @@
 
     private async Task DeletarCategoria(int categoriaId)
     {
-        bool? confirmacao = await DialogService.ShowMessageBoxAsync(
-            "Confirmação",
-            "Tem certeza que deseja deletar esta categoria?",
-            yesText: "Sim",
-            noText: "Não");
-        if (confirmacao == true)
+        var parameters = new DialogParameters<DialogoConfirmacao>
+        {
+            { x => x.ContentText, "Tem certeza que deseja deletar esta categoria?" },
+            { x => x.ButtonText, "Deletar" },
+            { x => x.Color, Color.Error }
+        };
+
+        var dialog = await DialogService.ShowAsync<DialogoConfirmacao>("Confirmar Exclusão", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
         {
             var response = await Http.DeleteAsync($"/api/categoria/{categoriaId}");
 
