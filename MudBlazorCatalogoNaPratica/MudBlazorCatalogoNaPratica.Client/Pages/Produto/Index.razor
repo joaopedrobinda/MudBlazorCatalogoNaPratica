@@ -1,0 +1,134 @@
+﻿@page "/produtos"
+
+<div class="d-flex justify-space-between align-center mt-6">
+    <div>
+        <MudText Typo="Typo.h4" Color="Color.Primary">Produtos</MudText>
+        <MudDivider Class="mb-6" />
+    </div>
+    
+    <MudButton Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Add"
+               Color="Color.Primary"
+               Href="/produto/create">
+        Novo Produto
+    </MudButton>
+</div>
+
+<MudTable T="Produto" ServerData="ServerReload" @ref="_table" Hover="true" Dense="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Produtos</MudText>
+        <MudSpacer />
+        <MudTextField T="string"
+                      Placeholder="Pesquisar..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      IconSize="Size.Medium"
+                      Class="mt-0"
+                      Clearable="true"
+                      DebounceInterval="500"
+                      OnDebounceIntervalElapsed="OnSearch" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Nome</MudTh>
+        <MudTh>Descrição</MudTh>
+        <MudTh>Ações</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nome">@context.Nome</MudTd>
+        <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
+        <MudTd DataLabel="Ações">
+            <div class="d-flex">
+                <MudTooltip Text="Editar Produto">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   Href="@($"/produto/edit/{context.ProdutoId}")" />
+                </MudTooltip>
+    
+                <MudTooltip Text="Excluir Produto">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   OnClick="@(() => DeletarProduto(context.ProdutoId))" />
+                </MudTooltip>
+            </div>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">Nenhum produto encontrado.</MudAlert>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Carregando...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <div class="d-flex justify-center py-3">
+            <MudTablePager InfoFormat="{first_item}-{last_item} de {all_items}" RowsPerPageString="Linhas por página:" />
+        </div>
+    </PagerContent>
+</MudTable>
+
+@code {
+    private MudTable<Produto> _table;
+    private string _searchString;
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        _table.ReloadServerData();
+    }
+    private async Task<TableData<Produto>> ServerReload(TableState state, CancellationToken token)
+    {
+        try
+        {
+            var pagina = state.Page + 1;
+            var quantidadePorPagina = state.PageSize;
+            var termoBusca = _searchString;
+
+            var httpResponse = await Http.GetAsync($"/api/produto?pagina={pagina}&quantidadePorPagina={quantidadePorPagina}&termoBusca={termoBusca}", token);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                var totalItens = int.Parse(httpResponse.Headers.GetValues("quantidadeRegistrosTotal").FirstOrDefault() ?? "0");
+                var responseString = await httpResponse.Content.ReadAsStringAsync();
+                
+                var produto = JsonSerializer.Deserialize<List<Produto>>(responseString,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                return new TableData<Produto> { TotalItems = totalItens, Items = produto };
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Requisição cancelada pelo MudBlazor (ex: usuário navegou rápido demais)
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Erro ao carregar dados", Severity.Error);
+        }
+
+        return new TableData<Produto> { TotalItems = 0, Items = new List<Produto>() };
+    }
+
+    private async Task DeletarProduto(int produtoId)
+    {
+        bool? confirmacao = await DialogService.ShowMessageBoxAsync(
+            "Confirmação",
+            "Tem certeza que deseja deletar esta categoria?",
+            yesText: "Sim",
+            noText: "Não");
+        if (confirmacao == true)
+        {
+            var response = await Http.DeleteAsync($"/api/produto/{produtoId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Deletado!", Severity.Success);
+                await _table.ReloadServerData();
+            }
+        }
+    }
+
+}
