@@ -58,6 +58,28 @@
                              Placeholder="Selecione ou digite para buscar">
             </MudAutocomplete>
         </MudItem>
+
+        @* Linha 4: Botão de Upload da Imagem e Preview *@
+        <MudItem xs="12">
+            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles" Accept=".jpg, .jpeg, .png, .webp">
+                <ActivatorContent>
+                    <MudButton HtmlTag="label"
+                               Variant="Variant.Filled"
+                               Color="Color.Info"
+                               StartIcon="@Icons.Material.Filled.CloudUpload">
+                        Selecionar Imagem do Produto
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+            
+            @if (!string.IsNullOrEmpty(Produto.Imagem))
+            {
+                <div class="mt-4">
+                    <MudText Typo="Typo.subtitle2" Class="mb-1">Visualização:</MudText>
+                    <MudImage Src="@Produto.Imagem" Alt="Imagem do Produto" Elevation="4" Class="rounded-lg" Style="max-height: 200px" ObjectFit="ObjectFit.Contain" />
+                </div>
+            }
+        </MudItem>
         <MudItem xs="12" Class="d-flex justify-space-between align-center mt-1">
             <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="OnCancel">
                 Cancelar
@@ -105,6 +127,19 @@
         return Task.FromResult(Categorias
             .Where(c => c.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
             .Select(c => c.CategoriaId));
+    }
+
+    private async Task UploadFiles(IBrowserFile file)
+    {
+        if (file != null)
+        {
+            var maxAllowedSize = 1024 * 1024 * 5; // 5 MB
+            using var stream = file.OpenReadStream(maxAllowedSize);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            var buffer = memoryStream.ToArray();
+            Produto.Imagem = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+        }
     }
 
     private async Task HandleSubmit()
