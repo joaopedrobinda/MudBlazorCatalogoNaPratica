@@ -1,5 +1,10 @@
 ﻿@page "/produtos/create"
 
+<div class="mb-6">
+    @* Breadcrumbs: Navegação em trilha *@
+    <MudBreadcrumbs Items="_breadcrumbItems" Separator="/" Class="pa-0 mb-2" />   
+</div>
+
 <div class="mt-6">
     <MudText Typo="Typo.h4" Color="Color.Primary">Criar Novo Produto</MudText>
     <MudDivider Class="mb-6" />
@@ -18,6 +23,12 @@
     private Produto _produto = new();
     private List<Categoria> _categorias = new();
     private bool _isSaving;
+
+    private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
+    {
+        new BreadcrumbItem("Produtos", href: "/produtos"),
+        new BreadcrumbItem("Novo Produto", href: null, disabled: true)
+    };
 
     protected override async Task OnInitializedAsync()
     {

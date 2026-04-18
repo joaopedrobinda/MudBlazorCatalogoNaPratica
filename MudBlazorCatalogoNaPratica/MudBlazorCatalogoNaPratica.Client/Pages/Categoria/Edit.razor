@@ -1,5 +1,10 @@
 ﻿@page "/categoria/edit/{categoriaid:int}"
 
+<div class="mb-6">
+    @* Breadcrumbs: Navegação em trilha *@
+    <MudBreadcrumbs Items="_breadcrumbItems" Separator="/" Class="pa-0 mb-2" />
+</div>
+
 <div class="mt-6">
     <MudText Typo="Typo.h4" Color="Color.Primary">Editar</MudText>
     <MudDivider Class="mb-6" />
@@ -24,6 +29,12 @@
     [Parameter] public int categoriaid { get; set; }
     private Categoria? _categoria;
     private bool _isSaving;
+
+    private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
+    {
+        new BreadcrumbItem("Categoria", href: "/categorias"),
+        new BreadcrumbItem("Editar Categoria", href: null, disabled: true)
+    };
 
     protected override async Task OnParametersSetAsync()
     {

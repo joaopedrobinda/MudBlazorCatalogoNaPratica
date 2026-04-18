@@ -1,5 +1,10 @@
 ﻿@page "/categoria/create"
 
+<div class="mb-6">
+    @* Breadcrumbs: Navegação em trilha *@
+    <MudBreadcrumbs Items="_breadcrumbItems" Separator="/" Class="pa-0 mb-2" />
+</div>
+
 <div class="mt-6">
     <MudText Typo="Typo.h4" Color="Color.Primary">Criar Nova Categoria</MudText>
     <MudDivider Class="mb-6" />
@@ -16,6 +21,13 @@
 @code {
     private Categoria _categoria = new();
     private bool _isSaving;
+
+    private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
+    {
+        new BreadcrumbItem("Categoria", href: "/categorias"),
+        new BreadcrumbItem("Nova Categoria", href: null, disabled: true)
+    };
+
 
     private async Task SalvarCategoriaAsync()
     {
