@@ -17,6 +17,15 @@ namespace MudBlazorCatalogoNaPratica.Controller
         {
             this.context = context;
         }
+
+        [HttpGet("all")]
+        public async Task<ActionResult<List<Categoria>>> GetAll()
+        {
+            return await context.Categorias
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+        }
+
         [HttpGet]
         public async Task<ActionResult<List<Categoria>>> Get([FromQuery] Paginacao paginacao)
         {

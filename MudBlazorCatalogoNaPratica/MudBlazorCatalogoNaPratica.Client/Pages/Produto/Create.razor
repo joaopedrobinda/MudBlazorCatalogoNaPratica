@@ -1,0 +1,47 @@
+﻿@page "/produtos/create"
+
+<div class="mt-6">
+    <MudText Typo="Typo.h4" Color="Color.Primary">Criar Novo Produto</MudText>
+    <MudDivider Class="mb-6" />
+</div>
+
+<MudPaper Class="pa-4" Elevation="3">
+   <ProdutoForm Produto="_produto"
+                 Categorias="_categorias"
+                IsSaving="_isSaving"
+                ButtonText="Salvar"
+                OnValidSubmit="SalvarProdutoAsync"
+                OnCancel="Voltar" />
+</MudPaper>
+
+@code {
+    private Produto _produto = new();
+    private List<Categoria> _categorias = new();
+    private bool _isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Http.GetFromJsonAsync<List<Categoria>>("api/categoria/all");
+        _categorias = response ?? new();
+    }
+
+    private async Task SalvarProdutoAsync()
+    {
+        try
+        {
+            _isSaving = true;
+            var response = await Http.PostAsJsonAsync("api/produto", _produto);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Produto criado com sucesso!", Severity.Success);
+                Voltar();
+            }
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private void Voltar() => NavigationManager.NavigateTo("/produtos");
+}

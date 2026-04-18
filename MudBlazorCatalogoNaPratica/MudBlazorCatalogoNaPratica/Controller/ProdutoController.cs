@@ -21,7 +21,9 @@ namespace MudBlazorCatalogoNaPratica.Controller
         [HttpGet]
         public async Task<ActionResult<List<Produto>>> Get([FromQuery] Paginacao paginacao)
         {
-            var queryable = _context.Produtos.AsQueryable();
+            var queryable = _context.Produtos
+                .Include(p => p.Categoria)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(paginacao.TermoBusca))
             {

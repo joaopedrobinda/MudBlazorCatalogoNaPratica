@@ -3,20 +3,22 @@
         <MudItem xs="12">
             <MudTextField @bind-Value="Categoria.Name"
                           For="@(() => Categoria.Name)"
-                          Label="Nome da Categoria*"
+                          Label="Nome da Categoria"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
-                          Immediate="true" />
+                          Immediate="true"
+                          Required="true" />
         </MudItem>
         
         <MudItem xs="12">
             <MudTextField @bind-Value="Categoria.Descricao"
                           For="@(() => Categoria.Descricao)"
-                          Label="Descrição*"
+                          Label="Descrição"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           Lines="3"
-                          Immediate="true" />
+                          Immediate="true" 
+                          Required="true" />
         </MudItem>
 
         <MudItem xs="12" Class="d-flex justify-space-between align-center mt-1">

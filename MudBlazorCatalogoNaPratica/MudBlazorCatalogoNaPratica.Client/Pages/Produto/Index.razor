@@ -9,7 +9,7 @@
     <MudButton Variant="Variant.Filled"
                StartIcon="@Icons.Material.Filled.Add"
                Color="Color.Primary"
-               Href="/produto/create">
+               Href="/produtos/create">
         Novo Produto
     </MudButton>
 </div>
@@ -31,18 +31,22 @@
     <HeaderContent>
         <MudTh>Nome</MudTh>
         <MudTh>Descrição</MudTh>
+        <MudTh>Preço</MudTh>
+        <MudTh>Categoria</MudTh>
         <MudTh>Ações</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Nome">@context.Nome</MudTd>
         <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
+        <MudTd DataLabel="Preco">@context.Preco</MudTd>
+        <MudTd DataLabel="Categoria">@context.Categoria?.Name</MudTd>
         <MudTd DataLabel="Ações">
             <div class="d-flex">
                 <MudTooltip Text="Editar Produto">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                    Color="Color.Primary"
                                    Size="Size.Small"
-                                   Href="@($"/produto/edit/{context.ProdutoId}")" />
+                                   Href="@($"/produtos/edit/{context.ProdutoId}")" />
                 </MudTooltip>
     
                 <MudTooltip Text="Excluir Produto">
