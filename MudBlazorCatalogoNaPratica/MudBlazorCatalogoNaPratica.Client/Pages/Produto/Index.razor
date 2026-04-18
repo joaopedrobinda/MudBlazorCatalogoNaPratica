@@ -1,4 +1,4 @@
-﻿@page "/produtos"
+@page "/produtos"
 
 <div class="d-flex justify-space-between align-center mt-6">
     <div>
@@ -38,7 +38,7 @@
     <RowTemplate>
         <MudTd DataLabel="Nome">@context.Nome</MudTd>
         <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
-        <MudTd DataLabel="Preco">@context.Preco</MudTd>
+        <MudTd DataLabel="Preço">@context.Preco.ToString("C2", _brazilCulture)</MudTd>
         <MudTd DataLabel="Categoria">@context.Categoria?.Name</MudTd>
         <MudTd DataLabel="Ações">
             <div class="d-flex">
@@ -74,6 +74,7 @@
 @code {
     private MudTable<Produto> _table;
     private string _searchString;
+    private System.Globalization.CultureInfo _brazilCulture = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
 
     private void OnSearch(string text)
     {

@@ -1,4 +1,4 @@
-﻿<MudForm @ref="form" @bind-IsValid="@_isFormValid">
+<MudForm @ref="form" @bind-IsValid="@_isFormValid">
     <MudGrid Spacing="2">
         <MudItem xs="12" sm="8">
             <MudTextField @bind-Value="Produto.Nome"
@@ -17,11 +17,14 @@
                              Label="Preço"
                              Variant="Variant.Outlined"
                              Margin="Margin.Dense"
-                             Format="C2"
+                             Format="N2"
                              Culture="@_brazilCulture"
                              Adornment="Adornment.Start"
+                             AdornmentText="R$"
                              HideSpinButtons="true"
-                             Required="true" />
+                             InputMode="InputMode.numeric"
+                             RequiredError="O preço é obrigatório"
+                             ErrorText="Informe um valor numérico válido" />
         </MudItem>
         
         @* Linha 2: Descrição *@
@@ -35,33 +38,25 @@
                           Required="true" />
         </MudItem>
 
-        @* Linha 3: Categoria com Select *@
+        @* Linha 3: Categoria com Autocomplete *@
         <MudItem xs="12" sm="6">
-            <MudSelect T="int"
-                       Label="Categoria"
-                       @bind-Value="Produto.CategoriaId"
-                       For="@(() => Produto.CategoriaId)"
-                       Variant="Variant.Outlined"
-                       Margin="Margin.Dense"
-                       AnchorOrigin="Origin.BottomCenter"
-                       TransformOrigin="Origin.TopCenter"
-                       MaxHeight="250"
-                       Dense="true"
-                       Required="true"
-                       Adornment="Adornment.Start">
-
-                @* Item placeholder — desabilitado, impede o "0" aparecer selecionado *@
-                <MudSelectItem T="int" Value="0" Disabled="true">
-                    Selecione uma categoria
-                </MudSelectItem>
-                @if (Categorias != null)
-                {
-                    @foreach (var cat in Categorias)
-                    {
-                        <MudSelectItem Value="@cat.CategoriaId">@cat.Name</MudSelectItem>
-                    }
-                }
-            </MudSelect>
+            <MudAutocomplete T="int"
+                             Label="Categoria"
+                             @bind-Value="Produto.CategoriaId"
+                             For="@(() => Produto.CategoriaId)"
+                             SearchFunc="@SearchCategoria"
+                             ToStringFunc="@(id => Categorias?.FirstOrDefault(c => c.CategoriaId == id)?.Name)"
+                             Variant="Variant.Outlined"
+                             Margin="Margin.Dense"
+                             AnchorOrigin="Origin.BottomCenter"
+                             TransformOrigin="Origin.TopCenter"
+                             MaxHeight="250"
+                             Dense="true"
+                             Required="true"
+                             Clearable="true"
+                             ResetValueOnEmptyText="true"
+                             Placeholder="Selecione ou digite para buscar">
+            </MudAutocomplete>
         </MudItem>
         <MudItem xs="12" Class="d-flex justify-space-between align-center mt-1">
             <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="OnCancel">
@@ -98,6 +93,19 @@
     [Parameter] public string ButtonText { get; set; } = "Salvar";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+
+    private Task<IEnumerable<int>> SearchCategoria(string value, CancellationToken token)
+    {
+        if (Categorias == null)
+            return Task.FromResult(Enumerable.Empty<int>());
+
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult(Categorias.Select(c => c.CategoriaId));
+
+        return Task.FromResult(Categorias
+            .Where(c => c.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+            .Select(c => c.CategoriaId));
+    }
 
     private async Task HandleSubmit()
     {
