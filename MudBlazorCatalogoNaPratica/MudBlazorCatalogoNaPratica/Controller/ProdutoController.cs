@@ -33,7 +33,7 @@ namespace MudBlazorCatalogoNaPratica.Controller
 
             await HttpContext.InserirParametroEmPageResonse(queryable, paginacao.QuantidadePorPagina);
 
-            return await queryable.Paginar(paginacao).ToListAsync();
+            return await queryable.OrderByDescending(x => x.ProdutoId).Paginar(paginacao).ToListAsync();
         }
 
         [HttpGet("{id}", Name = "GetProduto")]
