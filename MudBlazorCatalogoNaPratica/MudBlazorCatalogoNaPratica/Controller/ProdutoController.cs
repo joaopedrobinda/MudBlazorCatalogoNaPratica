@@ -39,7 +39,9 @@ namespace MudBlazorCatalogoNaPratica.Controller
         [HttpGet("{id}", Name = "GetProduto")]
         public async Task<ActionResult<Produto>> Get(int id)
         {
-            var produto = await _context.Produtos.FirstOrDefaultAsync(x => x.ProdutoId == id);
+            var produto = await _context.Produtos
+                .Include(p => p.Categoria)
+                .FirstOrDefaultAsync(x => x.ProdutoId == id);
             
             if (produto == null)
             {
@@ -67,6 +69,8 @@ namespace MudBlazorCatalogoNaPratica.Controller
 
             _context.Entry(produto).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            
+            produto.Categoria = await _context.Categorias.FindAsync(produto.CategoriaId);
             return Ok(produto);
         }
 

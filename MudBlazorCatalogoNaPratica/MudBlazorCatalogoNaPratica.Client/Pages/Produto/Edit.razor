@@ -1,0 +1,61 @@
+@page "/produtos/edit/{produtoid:int}"
+
+<div class="mt-6">
+    <MudText Typo="Typo.h4" Color="Color.Primary">Editar</MudText>
+    <MudDivider Class="mb-6" />
+</div>
+
+<MudPaper Class="pa-4" Elevation="3">
+    @if (_produto == null)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+    }
+    else
+    {
+        <ProdutoForm Produto="_produto"
+                       Categorias="_categorias"
+                       IsSaving="_isSaving"
+                       ButtonText="Alterar"
+                       OnValidSubmit="EditarProdutoAsync"
+                       OnCancel="Voltar" />
+    }
+</MudPaper>
+
+@code {
+    [Parameter] public int produtoid { get; set; }
+    private Produto? _produto;
+    private List<Categoria> _categorias = new();
+    private bool _isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Http.GetFromJsonAsync<List<Categoria>>("api/categoria/all");
+        _categorias = response ?? new();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _produto = await Http.GetFromJsonAsync<Produto>($"api/produto/{produtoid}");
+    }
+
+    private async Task EditarProdutoAsync()
+    {
+        try
+        {
+            _isSaving = true;
+            var response = await Http.PutAsJsonAsync($"api/produto/{produtoid}", _produto);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Produto editado!", Severity.Success);
+                Voltar();
+            }
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private void Voltar() => NavigationManager.NavigateTo("/produtos");
+}
+
