@@ -1,6 +1,5 @@
-﻿
-<MudItem xs="12">
-    <MudFileUpload T="IBrowserFile" FilesChanged="HandleFilesChanged" Accept=".jpg, .jpeg, .png, .webp">
+﻿<MudItem xs="12">
+    <MudFileUpload T="IBrowserFile" @ref="_fileUpload" FilesChanged="HandleFilesChanged" Accept=".jpg, .jpeg, .png, .webp">
         <ActivatorContent>
             <MudButton HtmlTag="label"
                        Variant="Variant.Filled"
@@ -26,12 +25,14 @@
     [Parameter] public string? Imagem { get; set; }
     [Parameter] public EventCallback<string?> ImagemChanged { get; set; }
     [Parameter] public string Label { get; set; } = "Selecionar Imagem";
+    
+    private MudFileUpload<IBrowserFile>? _fileUpload;
 
-    private async Task HandleFilesChanged(IBrowserFile file)
+    private async Task HandleFilesChanged(IBrowserFile? file)
     {
         if (file != null)
         {
-            var maxAllowedSize = 1024 * 1024 * 5; // 5 MB
+            var maxAllowedSize = 1024 * 1024 * 5; // 5 MB            
             using var stream = file.OpenReadStream(maxAllowedSize);
             using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
@@ -39,8 +40,13 @@
             
             var base64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
             
-            // Atualiza o valor e notifica o pai automaticamente via binding
+            // Atualiza a imagem para exibir a visualização
             await ImagemChanged.InvokeAsync(base64);
+        }
+        else
+        {
+            // Ocorre quando o usuário clica no 'X' do chip nativo do MudBlazor
+            await ImagemChanged.InvokeAsync(null);
         }
     }
 }
