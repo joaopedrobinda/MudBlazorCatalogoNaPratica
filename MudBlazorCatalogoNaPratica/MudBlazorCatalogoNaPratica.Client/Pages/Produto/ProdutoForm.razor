@@ -61,10 +61,13 @@
             </MudAutocomplete>
         </MudItem>
 
-        @* Linha 4: Botão de Upload da Imagem e Preview *@
+        
         <MudItem xs="12">
+            <MudPaper Outlined="true" 
+              Class="pa-6 border-dashed border-2 mud-border-lines-default d-flex flex-column justify-center" 
+              Style="background-color: var(--mud-palette-background-grey); min-height: 150px;">
             <UploadImagem @bind-Imagem="Produto.Imagem" Label="Selecionar Imagem do Produto" />
-            
+            </MudPaper>
         </MudItem>
         <MudItem xs="12" Class="d-flex justify-space-between align-center mt-1">
             <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="OnCancel">

@@ -18,6 +18,14 @@
                       Class="rounded-lg" Style="max-height: 200px" 
                       ObjectFit="ObjectFit.Contain" />
         </div>
+       <div class="mt-4">
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Error"
+                       StartIcon="@Icons.Material.Filled.Delete"
+                       OnClick="RemoverImagemExistente">
+                Deletar Imagem
+            </MudButton>
+        </div>
     }
 </MudItem>
 
@@ -48,5 +56,14 @@
             // Ocorre quando o usuário clica no 'X' do chip nativo do MudBlazor
             await ImagemChanged.InvokeAsync(null);
         }
+    }
+    private async Task RemoverImagemExistente()
+    {
+        // Limpa o input file caso tenha algo lá
+        if (_fileUpload is not null)
+            await _fileUpload.ClearAsync();
+
+        // Limpa a string base64, apagando a visualização da tela
+        await ImagemChanged.InvokeAsync(null);
     }
 }
