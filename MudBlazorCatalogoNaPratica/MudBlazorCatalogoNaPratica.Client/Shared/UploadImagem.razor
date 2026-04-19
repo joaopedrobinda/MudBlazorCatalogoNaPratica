@@ -1,0 +1,46 @@
+﻿
+<MudItem xs="12">
+    <MudFileUpload T="IBrowserFile" FilesChanged="HandleFilesChanged" Accept=".jpg, .jpeg, .png, .webp">
+        <ActivatorContent>
+            <MudButton HtmlTag="label"
+                       Variant="Variant.Filled"
+                       Color="Color.Info"
+                       StartIcon="@Icons.Material.Filled.CloudUpload">
+                @Label
+            </MudButton>
+        </ActivatorContent>
+    </MudFileUpload>
+    
+    @if (!string.IsNullOrEmpty(Imagem))
+    {
+        <div class="mt-4">
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Visualização:</MudText>
+            <MudImage Src="@Imagem" Alt="Preview" Elevation="4" 
+                      Class="rounded-lg" Style="max-height: 200px" 
+                      ObjectFit="ObjectFit.Contain" />
+        </div>
+    }
+</MudItem>
+
+@code {
+    [Parameter] public string? Imagem { get; set; }
+    [Parameter] public EventCallback<string?> ImagemChanged { get; set; }
+    [Parameter] public string Label { get; set; } = "Selecionar Imagem";
+
+    private async Task HandleFilesChanged(IBrowserFile file)
+    {
+        if (file != null)
+        {
+            var maxAllowedSize = 1024 * 1024 * 5; // 5 MB
+            using var stream = file.OpenReadStream(maxAllowedSize);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            var buffer = memoryStream.ToArray();
+            
+            var base64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+            
+            // Atualiza o valor e notifica o pai automaticamente via binding
+            await ImagemChanged.InvokeAsync(base64);
+        }
+    }
+}
