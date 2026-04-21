@@ -18,6 +18,14 @@ namespace MudBlazorCatalogoNaPratica.Controller
             _context = context;
         }
 
+        [HttpGet("categorias/{categoriaId}")]
+        public async Task<ActionResult<List<Produto>>> GetProdutosCategoria(int id) 
+        { 
+            return await _context.Produtos.Where(p => p.CategoriaId == id)
+                .ToListAsync();
+        }
+
+
         [HttpGet]
         public async Task<ActionResult<List<Produto>>> Get([FromQuery] Paginacao paginacao)
         {

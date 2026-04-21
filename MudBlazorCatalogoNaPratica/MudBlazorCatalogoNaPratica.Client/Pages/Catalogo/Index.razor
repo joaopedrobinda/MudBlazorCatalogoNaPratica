@@ -1,0 +1,75 @@
+﻿@page "/catalogo"
+
+<MudItem xs="12" sm="6">
+    <MudAutocomplete T="int"
+                     Label="Categoria"
+                     @bind-Value="codigoCategoria"
+                     For="@(() => codigoCategoria)"
+                     SearchFunc="@SearchCategoria"
+                     ToStringFunc="@(id => categorias?.FirstOrDefault(c => c.CategoriaId == id)?.Name)"
+                     Variant="Variant.Outlined"
+                     Margin="Margin.Dense"
+                     AnchorOrigin="Origin.BottomCenter"
+                     TransformOrigin="Origin.TopCenter"
+                     MaxHeight="250"
+                     Dense="true"
+                     Required="true"
+                     Clearable="true"
+                     ResetValueOnEmptyText="true"
+                     Placeholder="Selecione ou digite para buscar">
+    </MudAutocomplete>
+</MudItem>
+
+@code {
+    // Inicializar a lista vazia previne NullReferenceExceptions ao renderizar a tela
+    List<Categoria>? categorias { get; set; }
+    List<Produto> produtos { get; set; } = new();
+    
+    private int codigoCategoria;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = await Http.GetFromJsonAsync<List<Categoria>>("api/categoria/all");
+
+        // Boa prática: Verificar se a lista não é nula e tem elementos antes de pegar o índice [0]
+        if (categorias != null && categorias.Any())
+        {
+            codigoCategoria = categorias.First().CategoriaId;
+            await CarregaProdutos();
+        }
+    }
+
+    async Task CarregaProdutos()
+    {
+        if (codigoCategoria > 0)
+        {
+            produtos = await Http.GetFromJsonAsync<List<Produto>>($"/api/produto/categorias/{codigoCategoria}");
+            // Nota: StateHasChanged() geralmente não é necessário aqui se o método
+            // for engatilhado por um EventCallback ou pelos métodos de ciclo de vida do Blazor.
+        }
+        else
+        {
+            produtos.Clear();
+        }
+    }
+
+    // Substitui o 'CategoriaSelecionada'. O MudBlazor já nos entrega o 'id' diretamente.
+    private async Task OnCategoriaChanged(int id)
+    {
+        codigoCategoria = id;
+        await CarregaProdutos();
+    }
+
+    private Task<IEnumerable<int>> SearchCategoria(string value, CancellationToken token)
+    {
+        if (categorias == null)
+            return Task.FromResult(Enumerable.Empty<int>());
+
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult(categorias.Select(c => c.CategoriaId));
+
+        return Task.FromResult(categorias
+            .Where(c => c.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+            .Select(c => c.CategoriaId));
+    }
+}
