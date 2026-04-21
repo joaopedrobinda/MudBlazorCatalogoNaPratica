@@ -1,73 +1,133 @@
-﻿@page "/catalogo"
+@page "/catalogo"
 
-@* Autocomplete com Value + ValueChanged para reagir à seleção *@
-<MudItem xs="12" sm="6">
-    <MudAutocomplete T="int"
-                     Label="Categoria"
-                     Value="codigoCategoria"
-                     ValueChanged="OnCategoriaChanged"
-                     For="@(() => codigoCategoria)"
-                     SearchFunc="@SearchCategoria"
-                     ToStringFunc="@(id => categorias?.FirstOrDefault(c => c.CategoriaId == id)?.Name)"
-                     Variant="Variant.Outlined"
-                     Margin="Margin.Dense"
-                     AnchorOrigin="Origin.BottomCenter"
-                     TransformOrigin="Origin.TopCenter"
-                     MaxHeight="250"
-                     Dense="true"
-                     Required="true"
-                     Clearable="true"
-                     ResetValueOnEmptyText="true"
-                     Placeholder="Selecione ou digite para buscar" />
-</MudItem>
+<MudAutocomplete T="int"
+                 Label="Explorar Categorias"
+                 Value="codigoCategoria"
+                 ValueChanged="OnCategoriaChanged"
+                 SearchFunc="@SearchCategoria"
+                 ToStringFunc="@(id => categorias?.FirstOrDefault(c => c.CategoriaId == id)?.Name)"
+                 Variant="Variant.Outlined"
+                 Margin="Margin.Normal"
+                 MaxItems="null"
+                 Dense="true"
+                 Adornment="Adornment.Start"
+                 AdornmentIcon="@Icons.Material.Filled.FilterList"
+                 AdornmentColor="Color.Primary"
+                 HelperText="Escolha uma categoria para filtrar o catálogo abaixo"
+                 Placeholder="Digite para buscar..."
+                 Clearable="true"
+                 Class="mb-6"
+                 Style="background-color: white;">
+    
+    @* Template customizado para os itens da lista *@
+    <ItemTemplate Context="id">
+        <div class="d-flex align-center">
+            <MudIcon Icon="@ObterIconeCategoria(id)" Color="Color.Default" Size="Size.Small" Class="mr-3" />
+            <MudText Typo="Typo.body2">@categorias?.FirstOrDefault(c => c.CategoriaId == id)?.Name</MudText>
+        </div>
+    </ItemTemplate>
+</MudAutocomplete>
+<style>
+    /* Efeito suave de elevação ao passar o mouse sobre o card */
+    .card-hover {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
 
-@* Estados de feedback *@
-@if (carregando)
-{
-    <MudText Class="my-2">Carregando...</MudText>
-}
-else if (codigoCategoria > 0 && !produtos.Any())
-{
-    <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">
-        Nenhum produto encontrado.
-    </MudAlert>
-}
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+        }
 
-@* Grid de produtos *@
-@if (produtos.Any())
-{
-    <MudItem xs="12" Class="mt-4">
+    /* Trunca a descrição em 2 linhas para os cards não ficarem com tamanhos diferentes */
+    .text-truncate-2-lines {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+
+<MudItem xs="12" Class="mt-6">
+    @if (carregando)
+    {
         <MudGrid>
-            @foreach (var produto in produtos)
+            @* Skeleton Loading: Mostra 4 cards falsos carregando *@
+            @for (int i = 0; i < 4; i++)
             {
                 <MudItem xs="12" sm="6" md="4" lg="3">
-                    <MudCard Elevation="2">
-                        @if (!string.IsNullOrEmpty(produto.Imagem))
-                        {
-                            <MudImage Src="@produto.Imagem"
-                                      Alt="@produto.Nome"
-                                      ObjectFit="ObjectFit.Contain"
-                                      Style="height: 180px; width: 100%; display: block;" />
-                        }
-                        else
-                        {
-                            @* Placeholder quando não há imagem *@
-                            <MudPaper Class="d-flex justify-center align-center"
-                                      Style="height: 180px; background-color: var(--mud-palette-background-grey);">
-                                <MudIcon Icon="@Icons.Material.Filled.ImageNotSupported"
-                                         Color="Color.Default"
-                                         Size="Size.Large" />
-                            </MudPaper>
-                        }
-                        <MudCardContent Class="pa-3">
-                            <MudText Typo="Typo.subtitle1">@produto.Nome</MudText>
+                    <MudCard Elevation="2" Class="rounded-lg pa-2">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="180px" Class="rounded" />
+                        <MudCardContent>
+                            <MudSkeleton Width="80%" Height="24px" Class="mb-2" />
+                            <MudSkeleton Width="100%" Height="16px" Class="mb-1" />
+                            <MudSkeleton Width="60%" Height="16px" Class="mb-4" />
+                            <MudSkeleton Width="40%" Height="32px" />
                         </MudCardContent>
                     </MudCard>
                 </MudItem>
             }
         </MudGrid>
-    </MudItem>
-}
+    }
+    else if (codigoCategoria > 0 && !produtos.Any())
+    {
+        <MudPaper Elevation="0" Class="d-flex flex-column align-center justify-center pa-10 border-dashed border-2 mud-border-lines-default rounded-lg" Style="background-color: var(--mud-palette-background-grey);">
+            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Default" Class="mb-3" />
+            <MudText Typo="Typo.h6" Color="Color.Secondary">Nenhum produto encontrado</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Tente selecionar outra categoria para ver os itens disponíveis.</MudText>
+        </MudPaper>
+    }
+    else if (produtos.Any())
+    {
+        <MudGrid>
+            @foreach (var produto in produtos)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudCard Elevation="2" Class="rounded-lg card-hover h-100 d-flex flex-column">
+                        
+                        @* Área da Imagem com fundo sutil *@
+                        <div class="pa-4 d-flex justify-center align-center" style="background-color: var(--mud-palette-background-grey); height: 200px;">
+                            @if (!string.IsNullOrEmpty(produto.Imagem))
+                            {
+                                <MudImage Src="@produto.Imagem"
+                                          Alt="@produto.Nome"
+                                          ObjectFit="ObjectFit.Contain"
+                                          Style="max-height: 100%; max-width: 100%;" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.ImageNotSupported" Color="Color.Default" Size="Size.Large" />
+                            }
+                        </div>
+
+                        @* Conteúdo do Card (O flex-grow-1 empurra os botões sempre para o rodapé) *@
+                        <MudCardContent Class="pa-4 flex-grow-1">
+                            <MudText Typo="Typo.h6" Class="fw-bold mb-1">@produto.Nome</MudText>
+                            
+                            @* Assumindo que você tenha a propriedade Descricao. Se não tiver, pode remover. *@
+                            <MudText Typo="Typo.body2" Color="Color.Default" Class="mb-3 text-truncate-2-lines">
+                                @(produto.Descricao ?? "Nenhuma descrição disponível para este produto.")
+                            </MudText>
+                            
+                            @* Assumindo que você tenha a propriedade Preco (decimal). O "C" formata para a moeda local. *@
+                            <MudText Typo="Typo.h5" Color="Color.Primary" Class="fw-bold mt-auto">
+                                @((produto.Preco > 0 ? produto.Preco : 0m).ToString("C"))
+                            </MudText>
+                        </MudCardContent>
+                        
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudPaper Elevation="0" Class="d-flex flex-column align-center justify-center pa-10 border-dashed border-2 mud-border-lines-default rounded-lg" Style="background-color: var(--mud-palette-background-grey);">
+            <MudIcon Icon="@Icons.Material.Filled.Category" Size="Size.Large" Color="Color.Primary" Class="mb-3" />
+            <MudText Typo="Typo.h6" Color="Color.Primary">Bem-vindo ao Catálogo!</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Selecione uma categoria acima para começar a explorar nossos produtos.</MudText>
+        </MudPaper>
+    }
+</MudItem>
 
 @code {
     List<Categoria>? categorias;
@@ -78,12 +138,6 @@ else if (codigoCategoria > 0 && !produtos.Any())
     protected override async Task OnInitializedAsync()
     {
         categorias = await Http.GetFromJsonAsync<List<Categoria>>("api/categoria/all");
-
-        if (categorias != null && categorias.Any())
-        {
-            // Já dispara OnCategoriaChanged que chama CarregaProdutos
-            await OnCategoriaChanged(categorias.First().CategoriaId);
-        }
     }
 
     private async Task OnCategoriaChanged(int id)
@@ -139,5 +193,18 @@ else if (codigoCategoria > 0 && !produtos.Any())
         return Task.FromResult(categorias
             .Where(c => c.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
             .Select(c => c.CategoriaId));
+    }
+    private string ObterIconeCategoria(int id)
+    {
+        var nome = categorias?.FirstOrDefault(c => c.CategoriaId == id)?.Name?.ToLower();
+    
+        return nome switch
+        {
+            "livros" => Icons.Material.Filled.MenuBook,
+            "eletrônicos" => Icons.Material.Filled.Devices,
+            "games" => Icons.Material.Filled.SportsEsports,
+            "vestuário" => Icons.Material.Filled.Checkroom,
+            _ => Icons.Material.Filled.Label // Ícone padrão
+        };
     }
 }
