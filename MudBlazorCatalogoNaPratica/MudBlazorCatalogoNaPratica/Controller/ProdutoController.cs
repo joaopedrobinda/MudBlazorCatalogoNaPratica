@@ -19,9 +19,9 @@ namespace MudBlazorCatalogoNaPratica.Controller
         }
 
         [HttpGet("categorias/{categoriaId}")]
-        public async Task<ActionResult<List<Produto>>> GetProdutosCategoria(int id) 
+        public async Task<ActionResult<List<Produto>>> GetProdutosCategoria(int categoriaId) 
         { 
-            return await _context.Produtos.Where(p => p.CategoriaId == id)
+            return await _context.Produtos.Where(p => p.CategoriaId == categoriaId)
                 .ToListAsync();
         }
 

@@ -1,9 +1,11 @@
 ﻿@page "/catalogo"
 
+@* Autocomplete com Value + ValueChanged para reagir à seleção *@
 <MudItem xs="12" sm="6">
     <MudAutocomplete T="int"
                      Label="Categoria"
-                     @bind-Value="codigoCategoria"
+                     Value="codigoCategoria"
+                     ValueChanged="OnCategoriaChanged"
                      For="@(() => codigoCategoria)"
                      SearchFunc="@SearchCategoria"
                      ToStringFunc="@(id => categorias?.FirstOrDefault(c => c.CategoriaId == id)?.Name)"
@@ -16,48 +18,114 @@
                      Required="true"
                      Clearable="true"
                      ResetValueOnEmptyText="true"
-                     Placeholder="Selecione ou digite para buscar">
-    </MudAutocomplete>
+                     Placeholder="Selecione ou digite para buscar" />
 </MudItem>
 
+@* Estados de feedback *@
+@if (carregando)
+{
+    <MudText Class="my-2">Carregando...</MudText>
+}
+else if (codigoCategoria > 0 && !produtos.Any())
+{
+    <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">
+        Nenhum produto encontrado.
+    </MudAlert>
+}
+
+@* Grid de produtos *@
+@if (produtos.Any())
+{
+    <MudItem xs="12" Class="mt-4">
+        <MudGrid>
+            @foreach (var produto in produtos)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudCard Elevation="2">
+                        @if (!string.IsNullOrEmpty(produto.Imagem))
+                        {
+                            <MudImage Src="@produto.Imagem"
+                                      Alt="@produto.Nome"
+                                      ObjectFit="ObjectFit.Contain"
+                                      Style="height: 180px; width: 100%; display: block;" />
+                        }
+                        else
+                        {
+                            @* Placeholder quando não há imagem *@
+                            <MudPaper Class="d-flex justify-center align-center"
+                                      Style="height: 180px; background-color: var(--mud-palette-background-grey);">
+                                <MudIcon Icon="@Icons.Material.Filled.ImageNotSupported"
+                                         Color="Color.Default"
+                                         Size="Size.Large" />
+                            </MudPaper>
+                        }
+                        <MudCardContent Class="pa-3">
+                            <MudText Typo="Typo.subtitle1">@produto.Nome</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudItem>
+}
+
 @code {
-    // Inicializar a lista vazia previne NullReferenceExceptions ao renderizar a tela
-    List<Categoria>? categorias { get; set; }
-    List<Produto> produtos { get; set; } = new();
-    
+    List<Categoria>? categorias;
+    List<Produto> produtos = new();
+    private bool carregando = false;
     private int codigoCategoria;
 
     protected override async Task OnInitializedAsync()
     {
         categorias = await Http.GetFromJsonAsync<List<Categoria>>("api/categoria/all");
 
-        // Boa prática: Verificar se a lista não é nula e tem elementos antes de pegar o índice [0]
         if (categorias != null && categorias.Any())
         {
-            codigoCategoria = categorias.First().CategoriaId;
-            await CarregaProdutos();
+            // Já dispara OnCategoriaChanged que chama CarregaProdutos
+            await OnCategoriaChanged(categorias.First().CategoriaId);
         }
     }
 
-    async Task CarregaProdutos()
-    {
-        if (codigoCategoria > 0)
-        {
-            produtos = await Http.GetFromJsonAsync<List<Produto>>($"/api/produto/categorias/{codigoCategoria}");
-            // Nota: StateHasChanged() geralmente não é necessário aqui se o método
-            // for engatilhado por um EventCallback ou pelos métodos de ciclo de vida do Blazor.
-        }
-        else
-        {
-            produtos.Clear();
-        }
-    }
-
-    // Substitui o 'CategoriaSelecionada'. O MudBlazor já nos entrega o 'id' diretamente.
     private async Task OnCategoriaChanged(int id)
     {
         codigoCategoria = id;
         await CarregaProdutos();
+    }
+
+    private async Task CarregaProdutos()
+    {
+        if (codigoCategoria > 0)
+        {
+            try
+            {
+                carregando = true;
+                produtos.Clear(); // Limpa a lista anterior antes de carregar a nova
+                StateHasChanged();
+
+                // DICA: Abra o Console do Navegador (F12) para ver se esta URL está correta
+                var url = $"api/produto/categorias/{codigoCategoria}";
+            
+                var resultado = await Http.GetFromJsonAsync<List<Produto>>(url);
+            
+                produtos = resultado ?? new List<Produto>();
+            }
+            catch (Exception ex)
+            {
+                // Se cair aqui, o erro aparecerá no console do navegador
+                Console.WriteLine($"Erro ao carregar produtos: {ex.Message}");
+                produtos = new List<Produto>();
+            }
+            finally
+            {
+                carregando = false;
+                StateHasChanged(); // CRUCIAL: Notifica a tela que os dados chegaram
+            }
+        }
+        else
+        {
+            produtos.Clear();
+            StateHasChanged();
+        }
     }
 
     private Task<IEnumerable<int>> SearchCategoria(string value, CancellationToken token)
