@@ -1,17 +1,31 @@
 @page "/produtos"
+@using Microsoft.AspNetCore.Components.Authorization
 
 <div class="d-flex justify-space-between align-center mt-6">
     <div>
         <MudText Typo="Typo.h4" Color="Color.Primary">Produtos</MudText>
         <MudDivider Class="mb-6" />
     </div>
-    
-    <MudButton Variant="Variant.Filled"
-               StartIcon="@Icons.Material.Filled.Add"
-               Color="Color.Primary"
-               Href="/produtos/create">
-        Novo Produto
-    </MudButton>
+    <AuthorizeView Roles="Admin">
+        <Authorized>
+            <MudButton Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       Color="Color.Primary"
+                       Href="/produtos/create">
+                Novo Produto
+            </MudButton>
+        </Authorized>
+        <NotAuthorized>
+            <MudTooltip Text="Apenas administradores podem criar produtos">
+                <MudButton Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           Color="Color.Primary"
+                           Disabled="true">
+                    Novo Produto
+                </MudButton>
+            </MudTooltip>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 <MudTable T="Produto" ServerData="ServerReload" @ref="_table" Hover="true" Dense="true">

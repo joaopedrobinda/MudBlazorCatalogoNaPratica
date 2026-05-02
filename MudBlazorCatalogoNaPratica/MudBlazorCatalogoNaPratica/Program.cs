@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using MudBlazorCatalogoNaPratica.Client;
+using MudBlazorCatalogoNaPratica.Client.Auth;
 using MudBlazorCatalogoNaPratica.Components;
 using MudBlazorCatalogoNaPratica.Context;
 
@@ -21,6 +23,8 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler =
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
+
+builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 
 builder.Services.AddScoped(sp => new HttpClient());
 

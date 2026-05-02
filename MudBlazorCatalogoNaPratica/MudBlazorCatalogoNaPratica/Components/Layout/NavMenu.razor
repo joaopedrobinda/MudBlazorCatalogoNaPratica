@@ -1,9 +1,15 @@
-﻿
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
 <MudNavMenu>
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Home">Home</MudNavLink>
     <MudNavLink Href="categorias" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Outlined.Category">Categorias</MudNavLink>
     <MudNavLink Href="produtos" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Outlined.Inventory2">Produtos</MudNavLink>
     <MudNavLink Href="catalogo" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Outlined.ShoppingCart">Catalogo</MudNavLink>
+    <AuthorizeView Roles="Admin">
+        <Authorized>
+            <MudNavLink Href="backup" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Outlined.Backup">Backup</MudNavLink>
+        </Authorized>
+    </AuthorizeView>
 </MudNavMenu>
 
 

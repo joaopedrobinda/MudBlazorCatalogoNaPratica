@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+
 
 <PageTitle>Home</PageTitle>
 
@@ -6,9 +8,26 @@
     <MudText Typo="Typo.h3" GutterBottom="true" Color="Color.Primary">
         Catálogo
     </MudText>
+    <AuthorizeView>
+        <Authorized>
+            <MudText Typo="Typo.subtitle1" Class="mb-4">
+               Olá @context.User.Identity.Name!
+               @if(context.User.IsInRole("Admin"))
+               {
+                   <span> Você tem acesso a recursos administrativos.</span>
+                }
+                <br />
+               Bem-vindo ao nosso catálogo de produtos! Explore uma variedade de itens incríveis e encontre o que você precisa.
+            </MudText>
+        </Authorized>
+        <NotAuthorized>
+            <MudText Typo="Typo.subtitle1" Class="mb-4">
+                Bem-vindo ao nosso catálogo de produtos! Faça login para acessar uma experiência personalizada e aproveitar ofertas exclusivas.
+            </MudText>
+        </NotAuthorized>
+    </AuthorizeView>
 
     <MudDivider Class="mb-6" />
-
 
     <MudText Typo="Typo.body1" Class="mud-text-secondary">
         Projeto de exemplo para o curso de Blazor. Este projeto tem como objetivo demonstrar as funcionalidades do Blazor, um framework de desenvolvimento web da Microsoft que permite criar aplicações interativas usando C# e Razor.
