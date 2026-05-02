@@ -1,5 +1,9 @@
 @page "/categorias"
+@using Microsoft.AspNetCore.Components.Authorization
 @using MudBlazorCatalogoNaPratica.Client.Shared
+
+<AuthorizeView>
+    <Authorized>
 
 <div class="d-flex justify-space-between align-center mt-6">
     <div>
@@ -34,23 +38,23 @@
         <MudTh>Descrição</MudTh>
         <MudTh>Ações</MudTh>
     </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Nome">@context.Name</MudTd>
-        <MudTd DataLabel="Descricao">@context.Descricao</MudTd>
+    <RowTemplate Context="categoria">
+        <MudTd DataLabel="Nome">@categoria.Name</MudTd>
+        <MudTd DataLabel="Descricao">@categoria.Descricao</MudTd>
         <MudTd DataLabel="Ações">
             <div class="d-flex">
                 <MudTooltip Text="Editar Categoria">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                    Color="Color.Primary"
                                    Size="Size.Small"
-                                   Href="@($"/categoria/edit/{context.CategoriaId}")" />
+                                   Href="@($"/categoria/edit/{categoria.CategoriaId}")" />
                 </MudTooltip>
     
                 <MudTooltip Text="Excluir Categoria">
                     <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                    Color="Color.Error"
                                    Size="Size.Small"
-                                   OnClick="@(() => DeletarCategoria(context.CategoriaId))" />
+                                   OnClick="@(() => DeletarCategoria(categoria.CategoriaId))" />
                 </MudTooltip>
             </div>
         </MudTd>
@@ -67,6 +71,12 @@
         </div>
     </PagerContent>
 </MudTable>
+
+</Authorized>
+    <NotAuthorized>
+        <MudText Typo="Typo.h6" Color="Color.Error">Acesso negado.</MudText>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private MudTable<Categoria> _table;
