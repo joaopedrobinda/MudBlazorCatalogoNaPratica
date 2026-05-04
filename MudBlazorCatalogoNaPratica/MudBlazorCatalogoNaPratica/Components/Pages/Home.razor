@@ -33,3 +33,29 @@
         Projeto de exemplo para o curso de Blazor. Este projeto tem como objetivo demonstrar as funcionalidades do Blazor, um framework de desenvolvimento web da Microsoft que permite criar aplicações interativas usando C# e Razor.
     </MudText>
 </MudPaper>
+
+@* @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        
+        if(user.Identity.IsAuthenticated)
+        {
+            Console.WriteLine($"Usuário autenticado: {user.Identity.Name}");
+            if(user.IsInRole("Admin"))
+            {
+                Console.WriteLine("O usuário tem a função de Admin.");
+            }
+            else
+            {
+                Console.WriteLine("O usuário não tem a função de Admin.");
+            }
+        }
+
+    }
+}
+ *@
