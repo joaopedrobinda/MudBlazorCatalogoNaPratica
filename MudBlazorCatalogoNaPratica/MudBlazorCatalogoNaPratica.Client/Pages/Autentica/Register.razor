@@ -1,24 +1,24 @@
-@page "/login"
+@page "/register"
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center justify-center mud-width-full" Style="height: 100vh;">
     <MudCard Elevation="4" Class="pa-4 w-100" Style="border-radius: 12px;">
         <MudCardHeader>
             <CardHeaderContent>
-                <MudText Typo="Typo.h4" Align="Align.Center" Color="Color.Primary" Class="mb-2"><strong>Entrar</strong></MudText>
-                <MudText Typo="Typo.body2" Align="Align.Center" Class="opacity-70">Faça login para acessar o sistema</MudText>
+                <MudText Typo="Typo.h4" Align="Align.Center" Color="Color.Primary" Class="mb-2"><strong>Criar Conta</strong></MudText>
+                <MudText Typo="Typo.body2" Align="Align.Center" Class="opacity-70">Preencha os dados para se registrar</MudText>
             </CardHeaderContent>
         </MudCardHeader>
         
         <MudCardContent>
-            @if (LoginFahou)
+            @if (ExibirMensagem)
             {
                 <MudAlert Severity="Severity.Error" Class="mb-4">@AvisoMensagem</MudAlert>
                 <div class="d-none">
-                    <Aviso Exibir="@LoginFahou">@AvisoMensagem</Aviso>
+                    <Aviso Exibir="@ExibirMensagem">@AvisoMensagem</Aviso>
                 </div>
             }
 
-            <EditForm Model="@userInfo" OnValidSubmit="FazerLogin">
+            <EditForm Model="@userInfo" OnValidSubmit="RegistrarUsuario">
                 <DataAnnotationsValidator />
                 
                 <MudTextField @bind-Value="userInfo.Email" 
@@ -49,23 +49,22 @@
                            FullWidth="true"
                            Class="py-2"
                            Style="border-radius: 8px;">
-                    <strong>ACESSAR</strong>
+                    <strong>REGISTRAR</strong>
                 </MudButton>
             </EditForm>
         </MudCardContent>
         
         <MudCardActions Class="d-flex justify-center mt-2 pb-4">
-            <MudText Typo="Typo.body2">Não tem uma conta?</MudText>
-            <MudButton Href="/register" Variant="Variant.Text" Color="Color.Primary" Class="ml-2">Registre-se</MudButton>
+            <MudText Typo="Typo.body2">Já possui uma conta?</MudText>
+            <MudButton Href="/login" Variant="Variant.Text" Color="Color.Primary" Class="ml-2">Faça Login</MudButton>
         </MudCardActions>
     </MudCard>
 </MudContainer>
 @code {
-    private UserInfo userInfo = new UserInfo();
-    bool LoginFahou = false;
-    
+    private bool ExibirMensagem = false;
     [Parameter]
     public string AvisoMensagem { get; set; }
+    private UserInfo userInfo = new UserInfo();
 
     bool isShow;
     InputType PasswordInput = InputType.Password;
@@ -87,36 +86,50 @@
         }
     }
 
-    async Task FazerLogin()
+    private async Task RegistrarUsuario()
     {
         try
         {
-            var loginAsJson = JsonSerializer.Serialize(userInfo);
+            var registerAsJson = JsonSerializer.Serialize(userInfo);
+            var httpResonse = await Http.PostAsync("api/account/register", new StringContent(
+                registerAsJson, Encoding.UTF8, "application/json"));
 
-            var httpResonse = await Http.PostAsync("api/account/login",
-                new StringContent(loginAsJson, Encoding.UTF8, "application/json"));
-
-
-            if (httpResonse.IsSuccessStatusCode)
+            if (!httpResonse.IsSuccessStatusCode)
             {
                 var responseAsString = await httpResonse.Content.ReadAsStringAsync();
-
-                var loginResult = JsonSerializer.Deserialize<UserToken>(
-                    responseAsString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                await authStateProvider.Login(loginResult.Token);
-                NavigationManager.NavigateTo("/");
+                try 
+                {
+                    var errorResult = JsonSerializer.Deserialize<Dictionary<string, object>>(
+                        responseAsString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    if (errorResult != null && errorResult.ContainsKey("errors"))
+                    {
+                        var errorsList = JsonSerializer.Deserialize<List<string>>(errorResult["errors"].ToString());
+                        AvisoMensagem = string.Join(" | ", errorsList);
+                    }
+                    else
+                    {
+                        AvisoMensagem = "Falha ao registrar o usuário.";
+                    }
+                }
+                catch
+                {
+                    AvisoMensagem = "Ocorreu um erro ao tentar registrar o usuário.";
+                }
+                
+                ExibirMensagem = true;
             }
             else
             {
-                LoginFahou = true;
-                AvisoMensagem = "Falha ao efetuar login, verifique seu usuário e senha.";
+                Snackbar.Add("Conta criada com sucesso! Redirecionando para o login...", Severity.Success);
+                await Task.Delay(1500);
+                NavigationManager.NavigateTo("/login");
             }
         }
-        catch(Exception)
+        catch
         {
-            LoginFahou = true;
-            AvisoMensagem = "Falha ao efetuar login, verifique seu usuário e senha.";
+            ExibirMensagem = true;
+            AvisoMensagem = "Ocorreu um erro ao tentar registrar o usuário. Por favor, tente novamente.";
         }
     }
 }

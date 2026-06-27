@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Build.Framework;
@@ -41,7 +41,9 @@ namespace MudBlazorCatalogoNaPratica.Controller
             }
             else
             {
-                return BadRequest("Usuário ou senha inválidos");
+                // Retorna os erros exatos do Identity (ex: Senha fraca, email duplicado)
+                var errors = result.Errors.Select(e => e.Description);
+                return BadRequest(new { message = "Falha ao registrar", errors = errors });
             }
         }
 

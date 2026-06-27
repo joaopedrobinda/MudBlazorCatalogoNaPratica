@@ -18,7 +18,15 @@ namespace MudBlazorCatalogoNaPratica.Client.Auth
 
         public async override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var token = await js.GetFromLocalStorage(tokenKey);
+            string token = null;
+            try
+            {
+                token = await js.GetFromLocalStorage(tokenKey);
+            }
+            catch (InvalidOperationException)
+            {
+                // JSInterop não está disponível durante a pré-renderização estática do servidor
+            }
 
             if (string.IsNullOrEmpty(token))
             {

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MudBlazor.Services;
+using MudBlazorCatalogoNaPratica;
 using MudBlazorCatalogoNaPratica.Client;
 using MudBlazorCatalogoNaPratica.Client.Auth;
 using MudBlazorCatalogoNaPratica.Components;
@@ -31,7 +32,8 @@ builder.Services.AddControllers()
 
 builder.Services.AddIdentity<IdentityUser,IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddErrorDescriber<CustomIdentityErrorDescriber>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -49,6 +51,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddScoped<TokenAuthenticationProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<TokenAuthenticationProvider>());
 
 builder.Services.AddScoped(sp => new HttpClient());
 
