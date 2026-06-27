@@ -36,8 +36,12 @@ namespace MudBlazorCatalogoNaPratica.Controller
                 Email = model.Email
             };
             var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded) {
-                return GenerateToken(model);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, "User");
+
+
+                return await GenerateToken(model);
             }
             else
             {
@@ -53,22 +57,36 @@ namespace MudBlazorCatalogoNaPratica.Controller
             var result = await _singInManager.PasswordSignInAsync(userInfo.Email, userInfo.Password, isPersistent: false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                return GenerateToken(userInfo);
+                return await GenerateToken(userInfo);
             }
             else
             {
                 return BadRequest(new { message = "Usuário ou senha inválidos" });
             }
         }
-        private UserToken GenerateToken(UserInfo userInfo)
+        private async Task<UserToken> GenerateToken(UserInfo userInfo)
         {
-            var claims = new List<Claim>()
+            //var claims = new List<Claim>()
+            //{
+            //    new Claim(JwtRegisteredClaimNames.UniqueName, userInfo.Email),
+            //    new Claim(ClaimTypes.Name, userInfo.Email),
+            //    new Claim("joao", "joao.teste"),
+            //    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            //};
+
+            var user = await _singInManager.UserManager.FindByEmailAsync(userInfo.Email);
+
+            var roles = await _singInManager.UserManager.GetRolesAsync(user);
+
+            var claims = new List<Claim>();
+
+            claims.Add(new Claim(ClaimTypes.Name, userInfo.Email));
+
+            foreach (var role in roles)
             {
-                new Claim(JwtRegisteredClaimNames.UniqueName, userInfo.Email),
-                new Claim(ClaimTypes.Name, userInfo.Email),
-                new Claim("joao", "joao.teste"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -81,7 +99,7 @@ namespace MudBlazorCatalogoNaPratica.Controller
                 claims: claims,
                 expires: expiration,
                 signingCredentials: creds);
-            
+
             return new UserToken
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -91,3 +109,4 @@ namespace MudBlazorCatalogoNaPratica.Controller
         }
     }
 }
+
