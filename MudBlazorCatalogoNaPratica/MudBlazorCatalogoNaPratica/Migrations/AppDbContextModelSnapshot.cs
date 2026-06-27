@@ -41,6 +41,22 @@ namespace MudBlazorCatalogoNaPratica.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "c7b013f0-5201-4317-abd8-c211f91b7330",
+                            ConcurrencyStamp = "b8453489-0115-4fa8-b21a-c55dbfce1f93",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "a2df468e-28ff-451f-bfa9-e85df6ee47ab",
+                            ConcurrencyStamp = "f09b5523-2877-45ea-971a-28e46950e32b",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

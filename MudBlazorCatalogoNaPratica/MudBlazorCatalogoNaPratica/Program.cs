@@ -31,6 +31,7 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddIdentity<IdentityUser,IdentityRole>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders()
     .AddErrorDescriber<CustomIdentityErrorDescriber>();
