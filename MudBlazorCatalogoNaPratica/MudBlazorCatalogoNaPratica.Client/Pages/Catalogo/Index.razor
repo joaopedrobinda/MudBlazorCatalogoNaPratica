@@ -27,6 +27,34 @@
         </div>
     </ItemTemplate>
 </MudAutocomplete>
+
+@if (categorias != null && categorias.Any())
+{
+    <MudText Typo="Typo.subtitle1" Class="mb-3" Color="Color.Primary"><strong>Categorias Populares</strong></MudText>
+    <div class="d-flex flex-wrap gap-2 mb-8">
+        @foreach (var cat in categorias)
+        {
+            <MudButton Variant="@(codigoCategoria == cat.CategoriaId ? Variant.Filled : Variant.Outlined)"
+                       Color="Color.Primary"
+                       OnClick="@(() => OnCategoriaChanged(cat.CategoriaId))"
+                       Class="rounded-pill text-none px-4"
+                       StartIcon="@ObterIconeCategoria(cat.CategoriaId)">
+                @cat.Name
+            </MudButton>
+        }
+        
+        @if (codigoCategoria > 0)
+        {
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Error"
+                       OnClick="@(() => OnCategoriaChanged(0))"
+                       Class="rounded-pill text-none px-4"
+                       StartIcon="@Icons.Material.Filled.Clear">
+                Limpar Filtro
+            </MudButton>
+        }
+    </div>
+}
 <style>
     /* Efeito suave de elevação ao passar o mouse sobre o card */
     .card-hover {
