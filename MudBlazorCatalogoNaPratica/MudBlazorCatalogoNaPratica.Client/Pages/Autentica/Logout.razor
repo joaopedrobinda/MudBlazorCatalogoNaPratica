@@ -1,0 +1,26 @@
+﻿@page "/logout"
+<MudAlert Severity="Severity.Normal" Class="mb-4">@AvisoMensagem</MudAlert>
+<div class="d-none">
+    <Aviso Exibir="@ExibirMensagem"></Aviso>
+</div>
+
+@code {
+    private bool ExibirMensagem = false;
+    [Parameter]
+    public string AvisoMensagem { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        try
+        {
+            await authStateProvider.Logout();
+            NavigationManager.NavigateTo("/");
+        }
+        catch
+        {
+            ExibirMensagem = true;
+            AvisoMensagem = "Ocorreu um erro ao tentar fazer logout. Por favor, tente novamente.";
+        }
+    }
+
+}

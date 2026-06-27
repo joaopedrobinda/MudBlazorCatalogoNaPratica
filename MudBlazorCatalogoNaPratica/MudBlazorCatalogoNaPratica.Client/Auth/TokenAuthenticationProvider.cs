@@ -18,9 +18,10 @@ namespace MudBlazorCatalogoNaPratica.Client.Auth
 
         public async override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-           var token = await js.GetFromLocalStorage(tokenKey);
+            var token = await js.GetFromLocalStorage(tokenKey);
 
-            if(string.IsNullOrEmpty(token)) {
+            if (string.IsNullOrEmpty(token))
+            {
                 return notAuthenticate;
             }
             return CreateAuthenticationState(token);
@@ -77,17 +78,31 @@ namespace MudBlazorCatalogoNaPratica.Client.Auth
 
         public async Task Login(string token)
         {
-            await js.SetInLocalStorage(tokenKey, token);
+            try
+            {
+                await js.SetInLocalStorage(tokenKey, token);
 
-            var authState = CreateAuthenticationState(token);
-            NotifyAuthenticationStateChanged(Task.FromResult(authState));
+                var authState = CreateAuthenticationState(token);
+                NotifyAuthenticationStateChanged(Task.FromResult(authState));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task Logout()
         {
-            await js.RemoveItem(tokenKey);
-            http.DefaultRequestHeaders.Authorization = null;
-            NotifyAuthenticationStateChanged(Task.FromResult(notAuthenticate));
+            try
+            {
+                await js.RemoveItem(tokenKey);
+                http.DefaultRequestHeaders.Authorization = null;
+                NotifyAuthenticationStateChanged(Task.FromResult(notAuthenticate));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public TokenAuthenticationProvider(IJSRuntime ijsRuntime, HttpClient httpClient)
