@@ -1,0 +1,10 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <MudText Typo="Typo.body2" Class="mr-3">Olá, @context.User.Identity.Name!</MudText>
+        <MudButton Href="LogOut" Variant="Variant.Text" Color="Color.Inherit">Sair</MudButton>
+    </Authorized>
+    <NotAuthorized>
+        <MudButton Href="Register" Variant="Variant.Text" Color="Color.Inherit">Registrar-se</MudButton>
+        <MudButton Href="Login" Variant="Variant.Text" Color="Color.Inherit">Login</MudButton>
+    </NotAuthorized>
+</AuthorizeView>

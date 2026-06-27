@@ -7,10 +7,10 @@ namespace MudBlazorCatalogoNaPratica.Shared.Models
 {
     public class UserInfo
     {
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "O email é obrigatório")]
+        [EmailAddress(ErrorMessage = "O email não é válido")]
         public string Email { get; set; }
-        [Required]
+        [Required(ErrorMessage = "A senha é obrigatória")]
         public string Password { get; set; }
     }
 }

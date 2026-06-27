@@ -1,3 +1,4 @@
+@using MudBlazorCatalogoNaPratica.Client.Shared
 @inherits LayoutComponentBase
 @inject IJSRuntime JSRuntime
 
@@ -15,6 +16,7 @@
                        OnClick="@((e) => DrawerToggle())" />
         @* <MudText Typo="Typo.h5" Class="ml-3" Color="Color.Primary">Menu</MudText> *@
     <MudSpacer />
+    <MenuAuthentication />
     <MudIconButton Icon="@DarkLightModeButtonIcon"
                    Color="Color.Inherit"
                    OnClick="DarkModeToggle"

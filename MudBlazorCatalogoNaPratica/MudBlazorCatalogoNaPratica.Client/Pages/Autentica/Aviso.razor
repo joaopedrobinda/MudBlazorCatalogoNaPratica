@@ -1,0 +1,13 @@
+﻿@if (Exibir)
+{
+    <MudAlert Severity="Severity.Warning" Elevation="0" Variant="Variant.Filled">
+        @ChildContent
+    </MudAlert>
+}
+
+@code {
+    [Parameter]
+    public bool Exibir { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}
